@@ -54,8 +54,7 @@ export default function History() {
     }
   };
 
-  const handleDelete = async (id, e) => {
-    e.stopPropagation();
+  const handleDelete = async (id) => {
     if (!window.confirm('Delete this review permanently?')) return;
     try {
       await deleteReviewById(id);
@@ -83,30 +82,30 @@ export default function History() {
         <div className="space-y-3">
           {reviews.map((review) => (
             <div key={review._id} className="rounded-xl border border-slate-800 bg-slate-900">
-              <button
-                onClick={() => handleSelect(review._id)}
-                className="flex w-full items-center justify-between px-4 py-3 text-left"
-              >
-                <div>
+              <div className="flex w-full items-center justify-between px-4 py-3">
+                <button
+                  onClick={() => handleSelect(review._id)}
+                  className="flex flex-1 items-center text-left"
+                >
                   <span className="rounded bg-slate-800 px-2 py-0.5 text-xs font-medium text-slate-300">
                     {languageLabel(review.language)}
                   </span>
                   <span className="ml-3 text-sm text-slate-400">
                     {new Date(review.createdAt).toLocaleString()}
                   </span>
-                </div>
+                </button>
                 <div className="flex items-center gap-3">
                   <span className="text-sm font-semibold text-brand-400">
                     Overall: {review.result?.scores?.overall?.toFixed?.(1) ?? '-'}
                   </span>
                   <button
-                    onClick={(e) => handleDelete(review._id, e)}
+                    onClick={() => handleDelete(review._id)}
                     className="rounded-md bg-slate-800 px-2 py-1 text-xs text-red-400 hover:bg-red-500/20"
                   >
                     Delete
                   </button>
                 </div>
-              </button>
+              </div>
 
               {selectedId === review._id && (
                 <div className="border-t border-slate-800 p-4">
