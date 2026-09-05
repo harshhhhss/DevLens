@@ -13,6 +13,9 @@ export default function Home() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [result, setResult] = useState(null);
+  // Language the displayed result was actually reviewed as, so changing the
+  // dropdown afterwards does not re-highlight an existing result incorrectly.
+  const [resultLanguage, setResultLanguage] = useState('javascript');
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -33,6 +36,7 @@ export default function Home() {
     try {
       const { data } = await submitReview({ code, language });
       setResult(data.result);
+      setResultLanguage(data.language || language);
     } catch (err) {
       setError(err.response?.data?.message || 'Something went wrong while reviewing your code.');
     } finally {
@@ -91,7 +95,7 @@ export default function Home() {
 
       {result && !loading && (
         <div className="mt-10">
-          <ReviewResult result={result} language={language} />
+          <ReviewResult result={result} language={resultLanguage} />
         </div>
       )}
     </div>
