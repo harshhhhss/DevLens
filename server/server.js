@@ -10,9 +10,22 @@ const app = express();
 
 connectDB();
 
+// CLIENT_URL accepts a comma-separated list so the deployed frontend, Vercel
+// preview deployments and local development can all be allowed at once.
+const allowedOrigins = (process.env.CLIENT_URL || 'http://localhost:5173')
+  .split(',')
+  .map((origin) => origin.trim())
+  .filter(Boolean);
+
 app.use(
   cors({
-    origin: process.env.CLIENT_URL || 'http://localhost:5173',
+    origin(origin, callback) {
+      // Requests without an Origin header (curl, health checks, server-to-server)
+      // are not subject to CORS, so let them through.
+      if (!origin) return callback(null, true);
+      if (allowedOrigins.includes(origin)) return callback(null, true);
+      return callback(new Error(`Origin ${origin} is not allowed by CORS`));
+    },
     credentials: true,
   })
 );

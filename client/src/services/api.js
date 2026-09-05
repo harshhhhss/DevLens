@@ -1,6 +1,19 @@
 import axios from 'axios';
 
-const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api/v1';
+// VITE_API_BASE_URL is the canonical name; VITE_API_URL is still accepted so
+// existing local .env files keep working.
+const configuredUrl =
+  import.meta.env.VITE_API_BASE_URL || import.meta.env.VITE_API_URL;
+
+if (!configuredUrl && import.meta.env.PROD) {
+  // Falling back to localhost in a deployed build is never correct - it sends
+  // every request to the visitor's own machine. Fail loudly instead of silently.
+  throw new Error(
+    'VITE_API_BASE_URL is not set. Define it in your hosting provider environment variables and rebuild.'
+  );
+}
+
+const API_URL = configuredUrl || 'http://localhost:5000/api/v1';
 
 const api = axios.create({
   baseURL: API_URL,
