@@ -121,7 +121,7 @@ function normalizeResult(parsed) {
 async function reviewCode(code, language) {
   const client = getClient();
   const model = client.getGenerativeModel({
-    model: 'gemini-2.5-flash',
+    model: 'gemini-3.5-flash-lite',
     generationConfig: {
       temperature: 0.2,
       responseMimeType: 'application/json',
