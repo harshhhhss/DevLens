@@ -42,7 +42,9 @@ app.use('/api/v1/review', reviewRoutes);
 app.use(notFound);
 app.use(errorHandler);
 
-const PORT = process.env.PORT || 5000;
+// Matches .env.example. Deliberately not 5000, which is a common default and
+// collides with other local services.
+const PORT = process.env.PORT || 5055;
 
 app.listen(PORT, () => {
   console.log(`DevLens API running on port ${PORT}`);

@@ -13,7 +13,9 @@ if (!configuredUrl && import.meta.env.PROD) {
   );
 }
 
-const API_URL = configuredUrl || 'http://localhost:5000/api/v1';
+// Dev-only fallback when no .env exists yet. Matches server/.env.example's
+// PORT so a fresh clone does not land on the commonly-taken port 5000.
+const API_URL = configuredUrl || 'http://localhost:5055/api/v1';
 
 const api = axios.create({
   baseURL: API_URL,

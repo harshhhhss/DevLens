@@ -54,7 +54,7 @@ Run the API:
 npm run dev
 ```
 
-The API starts on `http://localhost:5000`.
+The API starts on `http://localhost:5055`.
 
 ### 2. Frontend
 
