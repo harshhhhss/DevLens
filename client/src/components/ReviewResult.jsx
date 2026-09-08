@@ -9,20 +9,20 @@ export default function ReviewResult({ result, language }) {
   const { summary, bugs, security, performance, refactor, scores, cleanCode } = result;
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-8">
       {summary && (
-        <div className="rounded-xl border border-brand-500/30 bg-brand-500/10 p-4 text-sm text-slate-200">
+        <div className="rounded-2xl border border-brand-500/30 bg-brand-500/10 p-6 text-sm leading-relaxed text-slate-200">
           {summary}
         </div>
       )}
 
-      <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
+      <div className="grid grid-cols-1 gap-6 sm:grid-cols-3">
         <ScoreCard label="Readability" score={scores?.readability} />
         <ScoreCard label="Security" score={scores?.security} />
         <ScoreCard label="Overall" score={scores?.overall} />
       </div>
 
-      <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
+      <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
         <IssueList title="Bugs" items={bugs} emptyText="No bugs found." />
         <IssueList
           title="Security Vulnerabilities"

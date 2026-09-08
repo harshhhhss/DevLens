@@ -1,6 +1,7 @@
 import React from 'react';
 import { Navigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext.jsx';
+import Spinner from './Spinner.jsx';
 
 export default function ProtectedRoute({ children }) {
   const { isAuthenticated, loading } = useAuth();
@@ -8,8 +9,13 @@ export default function ProtectedRoute({ children }) {
 
   if (loading) {
     return (
-      <div className="flex h-64 items-center justify-center text-slate-400">
-        Loading...
+      <div
+        role="status"
+        aria-live="polite"
+        className="flex h-64 items-center justify-center gap-3 text-sm text-slate-400"
+      >
+        <Spinner size="md" className="text-brand-500" />
+        Checking your session...
       </div>
     );
   }

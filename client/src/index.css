@@ -2,14 +2,49 @@
 @tailwind components;
 @tailwind utilities;
 
-html,
-body,
-#root {
-  height: 100%;
+@layer base {
+  html,
+  body,
+  #root {
+    height: 100%;
+  }
+
+  body {
+    @apply bg-slate-950 text-sm text-slate-100 antialiased;
+    font-feature-settings: 'cv02', 'cv03', 'cv04', 'cv11';
+  }
+
+  /* Consistent keyboard focus treatment across every interactive element. */
+  :where(a, button, input, select, textarea):focus-visible {
+    @apply outline-none ring-2 ring-brand-500/60 ring-offset-2 ring-offset-slate-950;
+  }
 }
 
-body {
-  @apply bg-slate-950 text-slate-100 antialiased;
+@layer components {
+  /* Shared surface for cards so padding, radius, border and shadow stay in
+     step across the review, history and auth screens. */
+  .surface {
+    @apply rounded-2xl border border-slate-800 bg-slate-900 shadow-card;
+  }
+
+  .btn-primary {
+    @apply inline-flex items-center justify-center rounded-lg bg-brand-600 px-6 py-3
+      text-sm font-semibold text-white shadow-card transition-colors
+      hover:bg-brand-500 active:bg-brand-700
+      disabled:cursor-not-allowed disabled:opacity-60 disabled:hover:bg-brand-600;
+  }
+
+  .btn-ghost {
+    @apply inline-flex items-center justify-center rounded-lg bg-slate-800 px-4 py-2
+      text-sm font-medium text-slate-200 transition-colors hover:bg-slate-700
+      disabled:cursor-not-allowed disabled:opacity-40 disabled:hover:bg-slate-800;
+  }
+
+  .field {
+    @apply w-full rounded-lg border border-slate-700 bg-slate-950 px-4 py-3 text-base
+      text-slate-100 transition-colors placeholder:text-slate-500
+      hover:border-slate-600 focus:border-brand-500;
+  }
 }
 
 ::-webkit-scrollbar {
@@ -22,12 +57,9 @@ body {
 }
 
 ::-webkit-scrollbar-thumb {
-  background-color: #334155;
-  border-radius: 9999px;
+  @apply rounded-full bg-slate-700;
 }
 
-textarea:focus,
-input:focus,
-select:focus {
-  outline: none;
+::-webkit-scrollbar-thumb:hover {
+  @apply bg-slate-600;
 }
