@@ -23,6 +23,24 @@ export default function Home() {
   // dropdown afterwards does not re-highlight an existing result incorrectly.
   const [resultLanguage, setResultLanguage] = useState('javascript');
 
+  // A loaded file sets the language from its extension, so the dropdown does
+  // not have to be corrected by hand.
+  const handleFileLoaded = ({ language: detected, warning, file }) => {
+    setError('');
+    if (detected) {
+      setLanguage(detected);
+      setSuccess(`Loaded ${file.name} as ${detected}.`);
+    } else {
+      setSuccess('');
+      setError(warning);
+    }
+  };
+
+  const handleFileError = (message) => {
+    setSuccess('');
+    setError(message);
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError('');
@@ -67,7 +85,7 @@ export default function Home() {
       <div className="mb-12 text-center">
         <h1 className="text-4xl font-bold tracking-tight text-white">AI Code Review</h1>
         <p className="mx-auto mt-4 max-w-2xl text-base leading-relaxed text-slate-400">
-          Paste your code, pick a language, and get an instant structured review powered by Gemini.
+          Paste your code or upload a file, and get an instant structured review powered by Gemini.
         </p>
       </div>
 
@@ -103,9 +121,21 @@ export default function Home() {
           </div>
         </div>
 
-        <CodeInput id="code-input" value={code} onChange={setCode} invalid={overLimit} />
+        <CodeInput
+          id="code-input"
+          value={code}
+          onChange={setCode}
+          invalid={overLimit}
+          onFileLoaded={handleFileLoaded}
+          onFileError={handleFileError}
+        />
 
         {error && <Alert variant="error">{error}</Alert>}
+        {success && (
+          <Alert variant="success" onDismiss={() => setSuccess('')}>
+            {success}
+          </Alert>
+        )}
 
         <button
           type="submit"
@@ -131,11 +161,6 @@ export default function Home() {
 
       {result && !loading && (
         <div className="mt-16 space-y-8">
-          {success && (
-            <Alert variant="success" onDismiss={() => setSuccess('')}>
-              {success}
-            </Alert>
-          )}
           <ReviewResult result={result} language={resultLanguage} />
         </div>
       )}
