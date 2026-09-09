@@ -97,4 +97,6 @@ const reviewSchema = new mongoose.Schema(
   { timestamps: true }
 );
 
-module.exports = mongoose.model('Review', reviewSchema);
+// Reuse an already-compiled model so re-evaluating this module (test runners,
+// hot reload) does not throw OverwriteModelError.
+module.exports = mongoose.models.Review || mongoose.model('Review', reviewSchema);

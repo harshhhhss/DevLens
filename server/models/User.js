@@ -37,4 +37,6 @@ userSchema.methods.matchPassword = async function matchPassword(enteredPassword)
   return bcrypt.compare(enteredPassword, this.password);
 };
 
-module.exports = mongoose.model('User', userSchema);
+// Reuse an already-compiled model so re-evaluating this module (test runners,
+// hot reload) does not throw OverwriteModelError.
+module.exports = mongoose.models.User || mongoose.model('User', userSchema);
