@@ -1,5 +1,9 @@
 const Review = require('../models/Review');
+const PromptFlag = require('../models/PromptFlag');
+const ReviewValidationFailure = require('../models/ReviewValidationFailure');
 const { reviewCode } = require('../services/aiService');
+const { scanForInjection, hashCode, snippetOf } = require('../services/promptSafety');
+const { AiValidationError } = require('../services/reviewValidation');
 
 const SUPPORTED_LANGUAGES = [
   'javascript',
@@ -33,6 +37,11 @@ const createReview = async (req, res, next) => {
     }
 
     const normalizedLanguage = String(language).toLowerCase();
+
+    // Observation only: a flagged submission is still reviewed normally. The
+    // prompt's delimiters are what actually contain the injection.
+    await recordInjectionAttempt(req.user._id, code, normalizedLanguage);
+
     const result = await reviewCode(code, normalizedLanguage);
 
     const review = await Review.create({
@@ -44,9 +53,59 @@ const createReview = async (req, res, next) => {
 
     return res.status(201).json(review);
   } catch (error) {
+    if (error instanceof AiValidationError) {
+      await recordValidationFailure(req.user._id, req.body.language, error);
+      // 502: the upstream model answered, but with something unusable.
+      return res.status(502).json({ message: error.message });
+    }
     next(error);
   }
 };
+
+/**
+ * Logs a possible prompt-injection attempt. Never throws: monitoring must not
+ * be able to fail a review that would otherwise succeed.
+ */
+async function recordInjectionAttempt(userId, code, language) {
+  try {
+    const { flagged, patterns } = scanForInjection(code);
+    if (!flagged) return;
+
+    console.warn(
+      `DevLens: possible prompt injection from user ${userId} [${patterns.join(', ')}]`
+    );
+
+    await PromptFlag.create({
+      userId,
+      language,
+      patterns,
+      codeHash: hashCode(code),
+      snippet: snippetOf(code),
+      codeLength: code.length,
+    });
+  } catch (error) {
+    console.error(`DevLens: could not record prompt flag: ${error.message}`);
+  }
+}
+
+/** Logs a validation failure. Never throws, for the same reason. */
+async function recordValidationFailure(userId, language, error) {
+  try {
+    console.error(
+      `DevLens: review validation failed after ${error.attempts} attempts: ${error.failures.join('; ')}`
+    );
+
+    await ReviewValidationFailure.create({
+      userId,
+      language: language ? String(language).toLowerCase() : '',
+      failures: error.failures,
+      attempts: error.attempts,
+      rawSnippet: error.rawSnippet,
+    });
+  } catch (logError) {
+    console.error(`DevLens: could not record validation failure: ${logError.message}`);
+  }
+}
 
 // @route GET /api/v1/review/history
 const getReviewHistory = async (req, res, next) => {

@@ -17,6 +17,15 @@ Every review returns:
 
 Reviews are saved per user, so you can revisit past findings from the History page.
 
+Every AI response is checked before you see it:
+
+- **Validated output** — a malformed reply is retried once, and never saved half-formed
+- **Injection-resistant handling** — submitted code is passed to the model as data, never as instructions
+
+The review pipeline is: send the code to Gemini inside a boundary-tagged block → validate the reply's
+shape → retry once if it fails → save and return only a response that passed. A reply that fails
+twice returns a `502` and is logged for debugging rather than stored as an empty review.
+
 ## Tech Stack
 
 - **Frontend:** React 18, Vite, Tailwind CSS, React Router, react-syntax-highlighter
@@ -45,9 +54,9 @@ DevLens/
 │   ├── config/            DB connection, env validation
 │   ├── controllers/       auth and review handlers
 │   ├── middleware/        auth, validation, rate limits, errors
-│   ├── models/            User, Review
+│   ├── models/            User, Review, PromptFlag, ReviewValidationFailure
 │   ├── routes/            /auth, /review
-│   ├── services/          Gemini integration
+│   ├── services/          Gemini integration, output validation, prompt safety
 │   ├── tests/             API tests
 │   ├── app.js             builds the Express app
 │   └── server.js          startup (env check, DB, listen)
@@ -117,6 +126,11 @@ database and never spend a Gemini call. Both suites run on every push and pull r
   and on review submission (30/hour) to protect the Gemini quota
 - **Server-side validation** on every auth and review route — the frontend's checks are a
   convenience, not the boundary
+- **Prompt-injection defence** — submitted code is wrapped in a delimiter carrying a random
+  per-request token and marked as untrusted data, so instruction-like text inside it cannot
+  address the model. Attempts are flagged and logged, not blocked
+- **AI output validation** — Gemini's reply is checked for shape before it is trusted, so a
+  malformed response cannot be saved as an empty-looking review
 - Passwords are hashed with bcrypt and never returned by the API
 - Reviews are scoped to their owner; another user's review returns 404, not 403
 

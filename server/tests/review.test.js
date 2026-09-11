@@ -115,7 +115,9 @@ describe('POST /api/v1/review', () => {
     expect(res.body.language).toBe('javascript');
   });
 
-  it('clamps out-of-range scores returned by the model', async () => {
+  it('retries instead of clamping out-of-range scores', async () => {
+    // Clamping 42 down to 10 would turn a model malfunction into a perfect
+    // score, so an out-of-range value now fails validation and is retried.
     const { token } = await authedUser();
     fetchSpy.mockResolvedValueOnce(
       geminiResponse({ ...AI_REVIEW, scores: { readability: 42, security: -5, overall: 7 } })
@@ -127,9 +129,23 @@ describe('POST /api/v1/review', () => {
       .send({ code: SAMPLE_CODE, language: 'javascript' });
 
     expect(res.status).toBe(201);
-    expect(res.body.result.scores.readability).toBe(10);
-    expect(res.body.result.scores.security).toBe(0);
-    expect(res.body.result.scores.overall).toBe(7);
+    expect(fetchSpy).toHaveBeenCalledTimes(2);
+    expect(res.body.result.scores).toMatchObject({ readability: 4, security: 1, overall: 2 });
+  });
+
+  it('rounds fractional scores to one decimal place', async () => {
+    const { token } = await authedUser();
+    fetchSpy.mockResolvedValueOnce(
+      geminiResponse({ ...AI_REVIEW, scores: { readability: 5.55, security: 3.21, overall: 7 } })
+    );
+
+    const res = await request(app)
+      .post('/api/v1/review')
+      .set('Authorization', `Bearer ${token}`)
+      .send({ code: SAMPLE_CODE, language: 'javascript' });
+
+    expect(res.status).toBe(201);
+    expect(res.body.result.scores).toMatchObject({ readability: 5.6, security: 3.2, overall: 7 });
   });
 
   it('tolerates a model reply wrapped in markdown fences', async () => {
@@ -226,16 +242,21 @@ describe('POST /api/v1/review', () => {
   });
 
   it('does not persist a review when the model returns unparseable output', async () => {
+    // Unparseable output is retried once, so both attempts must fail before the
+    // request gives up. 502: the model answered, but with something unusable.
     const { token } = await authedUser();
-    fetchSpy.mockResolvedValueOnce(
-      new Response(
-        JSON.stringify({
-          candidates: [
-            { content: { parts: [{ text: 'not json at all' }], role: 'model' }, index: 0 },
-          ],
-        }),
-        { status: 200, headers: { 'content-type': 'application/json' } }
-      )
+    // A fresh Response per call: a body can only be consumed once, so reusing
+    // one object would make the retry fail for the wrong reason.
+    fetchSpy.mockImplementation(
+      async () =>
+        new Response(
+          JSON.stringify({
+            candidates: [
+              { content: { parts: [{ text: 'not json at all' }], role: 'model' }, index: 0 },
+            ],
+          }),
+          { status: 200, headers: { 'content-type': 'application/json' } }
+        )
     );
 
     const res = await request(app)
@@ -243,7 +264,8 @@ describe('POST /api/v1/review', () => {
       .set('Authorization', `Bearer ${token}`)
       .send({ code: SAMPLE_CODE, language: 'javascript' });
 
-    expect(res.status).toBe(500);
+    expect(res.status).toBe(502);
+    expect(fetchSpy).toHaveBeenCalledTimes(2);
     expect(await Review.countDocuments()).toBe(0);
   });
 });
