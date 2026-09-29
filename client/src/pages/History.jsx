@@ -5,6 +5,7 @@ import { LANGUAGES } from '../components/LanguageSelect.jsx';
 import ReviewResult from '../components/ReviewResult.jsx';
 import Alert from '../components/Alert.jsx';
 import Spinner from '../components/Spinner.jsx';
+import ShareToggle from '../components/ShareToggle.jsx';
 import { getErrorMessage } from '../utils/errorMessage.js';
 
 function languageLabel(value) {
@@ -174,6 +175,13 @@ export default function History() {
                       </div>
                     ) : selectedReview ? (
                       <>
+                        <ShareToggle
+                          reviewId={selectedReview._id}
+                          visibility={selectedReview.visibility}
+                          onChange={(visibility) =>
+                            setSelectedReview((prev) => ({ ...prev, visibility }))
+                          }
+                        />
                         <div className="mb-8 overflow-x-auto rounded-xl border border-slate-800 bg-slate-950 p-6">
                           <pre className="whitespace-pre-wrap font-mono text-xs leading-relaxed text-slate-300">
                             {selectedReview.code}

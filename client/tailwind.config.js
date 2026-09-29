@@ -55,6 +55,20 @@ export default {
           900: '#4c1d95',
           950: '#2e1065',
         },
+        // Marketing/landing palette. The app UI stays on slate + brand; the
+        // landing page uses these slightly warmer, flatter neutrals so it reads
+        // as a product page rather than another screen of the app.
+        // accent-light is deliberately absent: it is exactly brand-400.
+        ink: {
+          950: '#0D0D14', // page background
+          900: '#15151F', // cards and surfaces
+          400: '#A6A6B8', // muted text
+          100: '#F4F4F6', // primary text
+        },
+        accent: {
+          DEFAULT: '#5B3DE0',
+          hover: '#4A2FC4',
+        },
       },
       boxShadow: {
         card: '0 1px 2px 0 rgb(0 0 0 / 0.3), 0 8px 24px -12px rgb(0 0 0 / 0.5)',

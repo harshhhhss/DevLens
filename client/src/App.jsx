@@ -4,9 +4,12 @@ import Navbar from './components/Navbar.jsx';
 import ProtectedRoute from './components/ProtectedRoute.jsx';
 import ErrorBoundary from './components/ErrorBoundary.jsx';
 import Home from './pages/Home.jsx';
+import Landing from './pages/Landing.jsx';
 import Login from './pages/Login.jsx';
 import Register from './pages/Register.jsx';
 import History from './pages/History.jsx';
+import PublicReview from './pages/PublicReview.jsx';
+import { useAuth } from './context/AuthContext.jsx';
 
 function NotFound() {
   return (
@@ -22,19 +25,37 @@ function NotFound() {
   );
 }
 
+/**
+ * "/" is the marketing page for visitors and the review workspace for anyone
+ * signed in. isAuthenticated comes from the stored token, which is read
+ * synchronously, so a returning user never sees the landing page flash first.
+ */
+function RootRoute() {
+  const { isAuthenticated } = useAuth();
+  return isAuthenticated ? <Home /> : <Landing />;
+}
+
 export default function App() {
   const location = useLocation();
+  const { isAuthenticated } = useAuth();
+
+  // The landing page and shared reviews carry their own headers, and shared
+  // reviews are read by people with no account at all.
+  const isLanding = location.pathname === '/' && !isAuthenticated;
+  const isPublicReview = location.pathname.startsWith('/public/review/');
+  const showAppNav = !isLanding && !isPublicReview;
 
   return (
     <div className="min-h-screen bg-slate-950">
-      <Navbar />
+      {showAppNav && <Navbar />}
       {/* Keyed by path so a crashed route recovers when the user navigates away,
           and so a page-level crash leaves the navbar usable. */}
       <ErrorBoundary key={location.pathname}>
         <Routes>
-          <Route path="/" element={<Home />} />
+          <Route path="/" element={<RootRoute />} />
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
+          <Route path="/public/review/:id" element={<PublicReview />} />
           <Route
             path="/history"
             element={

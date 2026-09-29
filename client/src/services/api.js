@@ -49,5 +49,16 @@ export const fetchReviewHistory = (page = 1, limit = 10) =>
   api.get(`/review/history?page=${page}&limit=${limit}`);
 export const fetchReviewById = (id) => api.get(`/review/${id}`);
 export const deleteReviewById = (id) => api.delete(`/review/${id}`);
+export const updateReviewVisibility = (id, visibility) =>
+  api.patch(`/review/${id}/visibility`, { visibility });
+
+/**
+ * Shared reviews are read without a session. This uses its own axios instance
+ * so no Authorization header is attached, and so a 404 on a private link
+ * cannot trip the 401 interceptor and sign the viewer out of their own account.
+ */
+const publicApi = axios.create({ baseURL: API_URL });
+
+export const fetchPublicReview = (id) => publicApi.get(`/public/review/${id}`);
 
 export default api;
