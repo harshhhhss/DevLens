@@ -45,6 +45,10 @@ as data rather than as instructions.
 - **Paste or upload** — type code directly, or drag-and-drop / pick a source file. The language
   is detected from the file extension and the dropdown follows it automatically
 - **Review history** — every review is saved per user and can be reopened from the History page
+- **Shareable public links** — reviews are private by default; publish one from its detail view to
+  get a link anyone can open without an account, with owner-identifying fields stripped
+- **Landing page** — signed-out visitors get a marketing page at `/`; signing in swaps the same
+  route for the review workspace
 - **Nine languages** — JavaScript, TypeScript, Python, Java, C++, Go, Rust, PHP, Ruby
 
 **Reliability and safety**
@@ -338,6 +342,33 @@ field omitted from the list for payload size.
 | `401` | Missing or invalid token |
 | `404` | Same conditions as `GET /review/:id` |
 
+#### `PATCH /review/:id/visibility`
+
+Owner-only. Body: `{ "visibility": "public" }` or `{ "visibility": "private" }`.
+
+`200` → the updated Review document.
+
+| Status | Trigger |
+| ------ | ------- |
+| `400` | `visibility` missing or not one of `private` / `public` |
+| `401` | Missing or invalid token |
+| `404` | No such review, it belongs to another user, or the id is malformed |
+
+### Public sharing
+
+#### `GET /public/review/:id`
+
+Auth: **No** — this is the only unauthenticated read in the API. Returns the review **only**
+while its owner has set `visibility: "public"`, with `userId` and `__v` stripped from the
+response.
+
+`200` → the Review document without owner-identifying fields.
+
+| Status | Trigger |
+| ------ | ------- |
+| `404` | The review is private, does not exist, or the id is malformed — all three answer identically, so a link never reveals that an id exists |
+| `429` | More than 60 requests from one IP in 15 minutes |
+
 ### Unmatched routes
 
 Any path that matches no route returns `404` → `{ "message": "Route not found - <path>" }`.
@@ -368,6 +399,7 @@ Instance method `matchPassword(plain)` compares against the hash.
 | `code` | String | Required — the submitted source |
 | `language` | String | Required, enum of the nine supported languages |
 | `result` | Subdocument | `summary`, `bugs[]`, `security[]`, `performance[]`, `refactor[]`, `scores{readability,security,overall}`, `cleanCode` |
+| `visibility` | String | `private` (default) or `public`, indexed — only the owner can change it |
 | `createdAt` / `updatedAt` | Date | Timestamps |
 
 Findings carry `line` / `issue` / `fix`; `security` entries additionally carry `severity`
@@ -409,6 +441,7 @@ Findings carry `line` / `issue` / `fix`; `security` entries additionally carry `
 | **Password handling** | bcrypt hashing with salt rounds 10; `select: false` so hashes are never returned |
 | **JWT auth** | 30-day signed tokens; `protect` middleware verifies the signature and re-loads the user on every request, so a deleted user's token stops working immediately |
 | **Ownership scoping** | Reviews are queried by `{ _id, userId }`, so another user's review returns `404` rather than `403` — existence is not leaked |
+| **Opt-in sharing** | Reviews are `private` until their owner publishes them. The public route matches on `visibility: 'public'` and strips `userId`, so a shared page carries no owner identity; it is rate limited at 60 requests per 15 minutes because it needs no token |
 | **Prompt-injection defence** | Code is wrapped in `<user_code boundary="…">` with a random 16-hex token per request and labelled untrusted data. Attempts are flagged to `PromptFlag`, not blocked |
 | **AI output validation** | Gemini's reply is shape-checked before it is trusted; failures retry once, then `502`, logged to `ReviewValidationFailure` |
 

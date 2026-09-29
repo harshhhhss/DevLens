@@ -218,6 +218,7 @@ erDiagram
         string code
         string language "enum of 9"
         object result "summary, findings, scores, cleanCode"
+        string visibility "private default, or public"
         date createdAt
     }
     PROMPTFLAG {
@@ -242,7 +243,15 @@ erDiagram
 ```
 
 `Review.result` is an embedded subdocument, not a separate collection: a result is never queried
-independently of its review and never shared, so embedding keeps a read to a single document.
+independently of its review, so embedding keeps a read to a single document.
+
+**Sharing is explicit opt-in.** `visibility` defaults to `private`, and only the owner can change
+it — the PATCH that sets it is scoped by `{ _id, userId }` like every other review write. The
+public read is the one query in the API that does *not* filter on `userId`; it filters on
+`visibility: 'public'` instead, and strips `userId` and `__v` before responding, so a shared page
+carries the code and the findings but nothing that identifies who ran it. A private review, a
+non-existent id and a malformed id all answer `404` with the same body, so a link can never be
+used to probe which ids exist.
 
 `PromptFlag` and `ReviewValidationFailure` reference a user but are **not** children of a review.
 A flag is written before the review exists, and a validation failure means no review was created
@@ -342,6 +351,7 @@ flowchart TD
 | **JWT + bcrypt** | Credential theft, session forgery | 30-day signed tokens, bcrypt at 10 rounds, `select: false` on the hash |
 | **Input validation** | Malformed payloads reaching domain logic; oversized submissions | `express-validator` rules run before controllers, mirroring the controllers' own messages |
 | **Ownership scoping** | Horizontal privilege escalation | Every review query filters on `userId`; a foreign id returns `404`, never `403` |
+| **Opt-in sharing** | Accidental exposure of private code; owner de-anonymisation | `visibility` defaults to `private`; the unauthenticated read matches `visibility: 'public'`, redacts `userId` and `__v`, and is rate limited at 60 per 15 min |
 | **Prompt delimiters** | Prompt injection via submitted code | Random 16-hex boundary token per request; code labelled untrusted data the model must not obey |
 | **Output validation** | A malfunctioning model silently producing an empty or nonsensical review | Shape check before normalisation, one retry, then `502` |
 | **Diagnostic logging** | Blind spots — not knowing abuse is happening | `PromptFlag` and `ReviewValidationFailure` record attempts and failures without blocking requests |
