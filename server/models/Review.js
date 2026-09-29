@@ -93,6 +93,13 @@ const reviewSchema = new mongoose.Schema(
       type: reviewResultSchema,
       required: true,
     },
+    // Reviews are private unless the owner explicitly opts in to sharing.
+    visibility: {
+      type: String,
+      enum: ['private', 'public'],
+      default: 'private',
+      index: true,
+    },
   },
   { timestamps: true }
 );

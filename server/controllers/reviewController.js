@@ -150,6 +150,59 @@ const getReviewById = async (req, res, next) => {
   }
 };
 
+// @route PATCH /api/v1/review/:id/visibility
+const updateReviewVisibility = async (req, res, next) => {
+  try {
+    const { visibility } = req.body;
+
+    // Scoped by userId exactly like the other review routes, so another user's
+    // review is indistinguishable from one that does not exist.
+    const review = await Review.findOneAndUpdate(
+      { _id: req.params.id, userId: req.user._id },
+      { visibility },
+      { new: true }
+    );
+
+    if (!review) {
+      return res.status(404).json({ message: 'Review not found' });
+    }
+
+    return res.status(200).json(review);
+  } catch (error) {
+    next(error);
+  }
+};
+
+/**
+ * Fields that must never appear on a shared review. `userId` identifies the
+ * owner directly; the others are Mongoose bookkeeping.
+ */
+const PUBLIC_REVIEW_OMITTED = ['userId', '__v'];
+
+// @route GET /api/v1/public/review/:id  (no authentication)
+const getPublicReview = async (req, res, next) => {
+  try {
+    // A private review answers exactly as a missing one does, so a 404 never
+    // reveals that an id exists.
+    const review = await Review.findOne({
+      _id: req.params.id,
+      visibility: 'public',
+    }).lean();
+
+    if (!review) {
+      return res.status(404).json({ message: 'Review not found' });
+    }
+
+    for (const field of PUBLIC_REVIEW_OMITTED) {
+      delete review[field];
+    }
+
+    return res.status(200).json(review);
+  } catch (error) {
+    next(error);
+  }
+};
+
 // @route DELETE /api/v1/review/:id
 const deleteReview = async (req, res, next) => {
   try {
@@ -165,4 +218,12 @@ const deleteReview = async (req, res, next) => {
   }
 };
 
-module.exports = { createReview, getReviewHistory, getReviewById, deleteReview };
+module.exports = {
+  createReview,
+  getReviewHistory,
+  getReviewById,
+  deleteReview,
+  updateReviewVisibility,
+  getPublicReview,
+  PUBLIC_REVIEW_OMITTED,
+};

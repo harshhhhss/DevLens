@@ -39,4 +39,15 @@ const reviewLimiter = makeLimiter({
   message: 'Review limit reached. Please try again later.',
 });
 
-module.exports = { authLimiter, reviewLimiter };
+/**
+ * Public share links are the only unauthenticated read in the API, so they get
+ * their own ceiling: generous enough for a link shared around a team, tight
+ * enough that the endpoint cannot be walked at speed.
+ */
+const publicReviewLimiter = makeLimiter({
+  windowMs: 15 * 60 * 1000,
+  limit: 60,
+  message: 'Too many requests. Please try again shortly.',
+});
+
+module.exports = { authLimiter, reviewLimiter, publicReviewLimiter };

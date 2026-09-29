@@ -93,12 +93,26 @@ const reviewIdRules = [
   handleValidation(404),
 ];
 
+const VISIBILITIES = ['private', 'public'];
+
+const visibilityRules = [
+  body('visibility')
+    .exists()
+    .withMessage(`Visibility must be one of: ${VISIBILITIES.join(', ')}`)
+    .bail()
+    .isIn(VISIBILITIES)
+    .withMessage(`Visibility must be one of: ${VISIBILITIES.join(', ')}`),
+  handleValidation(),
+];
+
 module.exports = {
   registerRules,
   loginRules,
   createReviewRules,
   reviewIdRules,
+  visibilityRules,
   handleValidation,
   SUPPORTED_LANGUAGES,
   MAX_CODE_LENGTH,
+  VISIBILITIES,
 };
