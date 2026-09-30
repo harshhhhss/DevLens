@@ -11,7 +11,7 @@ export default function SeverityBadge({ severity }) {
   const classes = SEVERITY_STYLES[severity] || SEVERITY_STYLES.Low;
   return (
     <span
-      className={`inline-block rounded-full border px-3 py-0.5 text-xs font-semibold uppercase tracking-wide ${classes}`}
+      className={`inline-block rounded-md border px-2.5 py-0.5 text-xs font-semibold uppercase tracking-wide ${classes}`}
     >
       {severity}
     </span>

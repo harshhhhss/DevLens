@@ -139,7 +139,7 @@ export default function History() {
                     )} review from ${new Date(review.createdAt).toLocaleString()}`}
                     className="flex flex-1 items-center gap-4 rounded-lg text-left"
                   >
-                    <span className="rounded-full bg-slate-800 px-3 py-0.5 text-xs font-semibold text-slate-300">
+                    <span className="rounded-md bg-slate-800 px-2.5 py-0.5 text-xs font-semibold text-slate-300">
                       {languageLabel(review.language)}
                     </span>
                     <span className="text-sm text-slate-400">

@@ -9,7 +9,7 @@ export default function IssueList({ title, items, emptyText, type = 'default' })
       <div className="mb-4 flex items-center justify-between gap-4">
         <h3 className="text-base font-semibold text-white">{title}</h3>
         {count > 0 && (
-          <span className="rounded-full bg-slate-800 px-3 py-0.5 text-xs font-semibold tabular-nums text-slate-300">
+          <span className="rounded-md bg-slate-800 px-2.5 py-0.5 text-xs font-semibold tabular-nums text-slate-300">
             {count}
           </span>
         )}
@@ -27,7 +27,7 @@ export default function IssueList({ title, items, emptyText, type = 'default' })
             (type === 'security' && item.severity) ? (
               <div className="mb-2 flex flex-wrap items-center gap-2">
                 {item.line !== null && item.line !== undefined && (
-                  <span className="rounded-full bg-slate-800 px-3 py-0.5 font-mono text-xs text-slate-300">
+                  <span className="rounded-md bg-slate-800 px-2.5 py-0.5 font-mono text-xs text-slate-300">
                     Line {item.line}
                   </span>
                 )}

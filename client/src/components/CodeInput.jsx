@@ -134,7 +134,7 @@ export default function CodeInput({
 
         {loadedFile ? (
           <span className="flex items-center gap-2 text-xs text-slate-400">
-            <span className="rounded-full bg-slate-800 px-3 py-1 font-mono text-slate-300">
+            <span className="rounded-md bg-slate-800 px-2.5 py-1 font-mono text-slate-300">
               {loadedFile.name}
             </span>
             {formatBytes(loadedFile.size)}

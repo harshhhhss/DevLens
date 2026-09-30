@@ -44,7 +44,7 @@ const FEATURES = [
   {
     n: '06',
     title: 'Clean Rewrite',
-    body: 'The whole snippet rewritten in its own language — never ported to another one.',
+    body: 'The whole snippet rewritten in its own language, never ported to another one.',
   },
 ];
 
@@ -62,7 +62,7 @@ const STEPS = [
   {
     n: '03',
     title: 'Get your report',
-    body: 'Findings, scores and a clean rewrite — validated for shape before you ever see them.',
+    body: 'Findings, scores and a clean rewrite, validated for shape before you ever see them.',
   },
 ];
 
@@ -75,7 +75,7 @@ const SECURITY = [
   {
     n: '02',
     title: 'Validated before you see it',
-    body: "Every AI response is shape-checked. A malformed one is retried once, then refused — you're never shown an empty review.",
+    body: "Every AI response is shape-checked. A malformed one is retried once, then refused. You're never shown an empty review.",
   },
   {
     n: '03',
@@ -230,7 +230,7 @@ export default function Landing() {
 
             <p className="mt-6 max-w-lg text-base leading-relaxed text-ink-400">
               Paste a snippet or drop a file and get back the bugs, security holes and performance
-              problems a careful reviewer would find — plus a clean rewrite, in seconds.
+              problems a careful reviewer would find, plus a clean rewrite, in seconds.
             </p>
 
             <div className="mt-10 flex flex-wrap items-center gap-8">
@@ -310,7 +310,7 @@ export default function Landing() {
             </h2>
             <p className="mt-4 max-w-md text-sm leading-relaxed text-ink-400">
               Reviews are private by default. Flip one to public and you get a link anyone can open
-              — no account needed, and your identity stripped from the response.
+              (no account needed), and your identity is stripped from the response.
             </p>
             <Link
               to="/register"
