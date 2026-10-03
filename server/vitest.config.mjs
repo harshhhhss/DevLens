@@ -12,6 +12,9 @@ export default defineConfig({
       GEMINI_API_KEY: 'test-gemini-key',
       CLIENT_URL: 'http://localhost:5173',
       PORT: '5055',
+      TOKEN_ENCRYPTION_KEY: 'a'.repeat(64),
+      GITHUB_CLIENT_ID: 'test-client-id',
+      GITHUB_CLIENT_SECRET: 'test-client-secret',
     },
     setupFiles: ['./tests/setup.js'],
     // Suites share a single in-memory MongoDB connection per worker, so they

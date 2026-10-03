@@ -105,8 +105,21 @@ const visibilityRules = [
   handleValidation(),
 ];
 
+const pullRequestReviewRules = [
+  body('owner').trim().notEmpty().withMessage('Repository owner is required'),
+  body('repo').trim().notEmpty().withMessage('Repository name is required'),
+  body('pullNumber')
+    .exists()
+    .withMessage('Pull request number is required')
+    .bail()
+    .isInt({ min: 1 })
+    .withMessage('Pull request number must be a positive integer'),
+  handleValidation(),
+];
+
 module.exports = {
   registerRules,
+  pullRequestReviewRules,
   loginRules,
   createReviewRules,
   reviewIdRules,

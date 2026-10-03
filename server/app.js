@@ -4,6 +4,7 @@ const helmet = require('helmet');
 const authRoutes = require('./routes/authRoutes');
 const reviewRoutes = require('./routes/reviewRoutes');
 const publicRoutes = require('./routes/publicRoutes');
+const githubRoutes = require('./routes/githubRoutes');
 const { notFound, errorHandler } = require('./middleware/errorMiddleware');
 
 /**
@@ -50,6 +51,7 @@ function createApp() {
   app.use('/api/v1/auth', authRoutes);
   app.use('/api/v1/review', reviewRoutes);
   app.use('/api/v1/public', publicRoutes);
+  app.use('/api/v1/github', githubRoutes);
 
   app.use(notFound);
   app.use(errorHandler);

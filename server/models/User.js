@@ -22,6 +22,24 @@ const userSchema = new mongoose.Schema(
       minlength: 6,
       select: false,
     },
+    // GitHub OAuth token, encrypted at rest by services/tokenCrypto.js.
+    // select:false so it is never returned by an ordinary query, and never
+    // serialised into an API response by accident.
+    githubToken: {
+      type: String,
+      select: false,
+      default: null,
+    },
+    // Safe for the frontend to read: says whether a token exists without
+    // exposing it.
+    githubConnected: {
+      type: Boolean,
+      default: false,
+    },
+    githubLogin: {
+      type: String,
+      default: null,
+    },
   },
   { timestamps: true }
 );
