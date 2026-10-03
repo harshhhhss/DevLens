@@ -45,10 +45,16 @@ as data rather than as instructions.
 - **Paste or upload** — type code directly, or drag-and-drop / pick a source file. The language
   is detected from the file extension and the dropdown follows it automatically
 - **Review history** — every review is saved per user and can be reopened from the History page
+- **Recurring patterns** — every finding is tagged with one of 27 fixed categories, and the
+  Patterns page aggregates them across your own reviews to show which problems keep coming back,
+  with a recent-versus-previous trend
 - **Shareable public links** — reviews are private by default; publish one from its detail view to
   get a link anyone can open without an account, with owner-identifying fields stripped
 - **Landing page** — signed-out visitors get a marketing page at `/`; signing in swaps the same
   route for the review workspace
+- **GitHub pull requests** — connect a GitHub account, pick a repository and review an open pull
+  request file by file, through the same validated, injection-resistant pipeline as pasted code
+- **Command palette and shortcuts** — `Ctrl/Cmd+K` for quick actions, `?` for the shortcut list
 - **Nine languages** — JavaScript, TypeScript, Python, Java, C++, Go, Rust, PHP, Ruby
 
 **Reliability and safety**
@@ -73,6 +79,7 @@ as data rather than as instructions.
 | **Backend** | Node.js 18+, Express 4.19, Mongoose 8.5 |
 | **Database** | MongoDB (Atlas or local) |
 | **AI** | Google Gemini via `@google/generative-ai` 0.21 — model `gemini-3.5-flash-lite` |
+| **GitHub** | `@octokit/rest` for repository, pull request and comment APIs |
 | **Auth** | `jsonwebtoken` 9.0, `bcryptjs` 2.4 |
 | **Security** | `helmet` 8.3, `express-rate-limit` 8.7, `express-validator` 7.3 |
 | **Testing** | Vitest, Supertest 7.2, mongodb-memory-server 11.2, React Testing Library 16.3, jsdom |
@@ -208,6 +215,11 @@ cd client && npm test      # 85 tests
 | `JWT_SECRET` | Secret used to sign auth tokens — use a long random string | Yes | `replace_with_a_long_random_secret` |
 | `GEMINI_API_KEY` | Google Gemini API key | Yes | `your_gemini_api_key_here` |
 | `CLIENT_URL` | Allowed CORS origin(s). Comma-separate for multiple | Yes | `http://localhost:5173` |
+| `TOKEN_ENCRYPTION_KEY` | Encrypts stored GitHub tokens at rest. 64 hex chars, or any long passphrase | Only for GitHub | `replace_with_64_hex_chars_or_a_long_passphrase` |
+| `GITHUB_CLIENT_ID` | OAuth App client id from github.com/settings/developers | Only for GitHub | `your_github_oauth_client_id` |
+| `GITHUB_CLIENT_SECRET` | OAuth App client secret | Only for GitHub | `your_github_oauth_client_secret` |
+| `GITHUB_CALLBACK_URL` | Must match the OAuth App's callback exactly | Only for GitHub | `http://localhost:5055/api/v1/github/callback` |
+| `GITHUB_SCOPE` | `repo` reads private repositories, `public_repo` is narrower | No (default `repo`) | `repo` |
 
 All five are enforced by `server/config/validateEnv.js` at startup. A missing or blank value
 stops the process with a message naming the variable and what it is for.
@@ -354,6 +366,61 @@ Owner-only. Body: `{ "visibility": "public" }` or `{ "visibility": "private" }`.
 | `401` | Missing or invalid token |
 | `404` | No such review, it belongs to another user, or the id is malformed |
 
+#### `GET /review/insights`
+
+Aggregates finding categories across **the signed-in user's own reviews only**, over their 100 most
+recent. `trendWindow` is how many of the newest reviews form the "recent" bucket, compared against
+the bucket before it.
+
+`200` →
+
+```json
+{
+  "totalReviews": 12,
+  "totalFindings": 48,
+  "trendWindow": 5,
+  "categories": [
+    {
+      "category": "sql-injection",
+      "label": "SQL and query injection",
+      "count": 7,
+      "recent": 4,
+      "previous": 2,
+      "trend": "up"
+    }
+  ]
+}
+```
+
+| Status | Trigger |
+| ------ | ------- |
+| `401` | Missing or invalid token |
+
+### GitHub
+
+All GitHub routes require authentication except the OAuth callback, which GitHub redirects the
+browser to and which is authenticated by an HMAC-signed `state` instead.
+
+| Method | Path | Returns / notes |
+| ------ | ---- | --------------- |
+| `GET` | `/github/status` | `{ connected, login, scope }`. Never returns the token |
+| `GET` | `/github/connect` | `{ url }` to send the browser to GitHub's authorize page |
+| `GET` | `/github/callback` | Exchanges `?code`, stores the encrypted token, redirects to the app |
+| `DELETE` | `/github/disconnect` | Deletes the stored token |
+| `GET` | `/github/repos` | `{ repos }` for the connected account |
+| `GET` | `/github/repos/:owner/:repo/pulls` | `{ pulls }`, open pull requests |
+| `POST` | `/github/review` | `{ owner, repo, pullNumber }` → the saved per-file report |
+| `POST` | `/github/review/:reviewId/comment` | Posts the summary to the PR. Never automatic |
+
+| Status | Trigger |
+| ------ | ------- |
+| `400` | Missing or invalid `owner` / `repo` / `pullNumber` |
+| `401` | Missing or invalid token |
+| `404` | The report does not exist or belongs to another user |
+| `409` | No GitHub account connected |
+| `429` | Review rate limit (a pull request costs several Gemini calls) |
+| `502` | GitHub rejected or failed the request |
+
 ### Public sharing
 
 #### `GET /public/review/:id`
@@ -404,6 +471,9 @@ Instance method `matchPassword(plain)` compares against the hash.
 
 Findings carry `line` / `issue` / `fix`; `security` entries additionally carry `severity`
 (`Low` \| `Medium` \| `High` \| `Critical`); `refactor` entries carry `suggestion` / `reason`.
+Every finding also carries a `category` from a fixed 27-value taxonomy
+(`server/services/findingCategories.js`), which is what makes the Patterns page possible: free-text
+labels would never aggregate, because the same problem comes back worded differently each time.
 
 ### `PromptFlag` — a suspected prompt-injection attempt
 
@@ -441,6 +511,7 @@ Findings carry `line` / `issue` / `fix`; `security` entries additionally carry `
 | **Password handling** | bcrypt hashing with salt rounds 10; `select: false` so hashes are never returned |
 | **JWT auth** | 30-day signed tokens; `protect` middleware verifies the signature and re-loads the user on every request, so a deleted user's token stops working immediately |
 | **Ownership scoping** | Reviews are queried by `{ _id, userId }`, so another user's review returns `404` rather than `403` — existence is not leaked |
+| **Encrypted GitHub tokens** | Access tokens are stored AES-256-GCM encrypted (`TOKEN_ENCRYPTION_KEY`), never in plaintext. The field is `select: false` so it is never returned by an ordinary query, and the API exposes only a `githubConnected` boolean |
 | **Opt-in sharing** | Reviews are `private` until their owner publishes them. The public route matches on `visibility: 'public'` and strips `userId`, so a shared page carries no owner identity; it is rate limited at 60 requests per 15 minutes because it needs no token |
 | **Prompt-injection defence** | Code is wrapped in `<user_code boundary="…">` with a random 16-hex token per request and labelled untrusted data. Attempts are flagged to `PromptFlag`, not blocked |
 | **AI output validation** | Gemini's reply is shape-checked before it is trusted; failures retry once, then `502`, logged to `ReviewValidationFailure` |

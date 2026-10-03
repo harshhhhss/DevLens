@@ -44,13 +44,18 @@ flowchart TB
         Gemini["Gemini<br/>gemini-3.5-flash-lite"]
     end
 
+    subgraph GitHubCloud["GitHub"]
+        GH["REST API<br/>repos · pulls · comments"]
+    end
+
     SPA -->|"loads from"| Static
     SPA -->|"HTTPS · JSON · Bearer JWT"| API
     API -->|"Mongoose driver"| DB
     API -->|"HTTPS · prompt"| Gemini
+    API -->|"Octokit · encrypted token"| GH
 
     classDef ext fill:#2e1065,stroke:#7c3aed,color:#ede9fe
-    class Gemini,DB ext
+    class Gemini,DB,GH ext
 ```
 
 **Boundaries worth noting**
@@ -210,6 +215,8 @@ erDiagram
         string name
         string email UK "unique, lowercased"
         string password "bcrypt, select:false"
+        string githubToken "AES-256-GCM, select:false"
+        boolean githubConnected"
         date createdAt
     }
     REVIEW {
@@ -217,7 +224,7 @@ erDiagram
         ObjectId userId FK "indexed"
         string code
         string language "enum of 9"
-        object result "summary, findings, scores, cleanCode"
+        object result "findings with category, scores, cleanCode"
         string visibility "private default, or public"
         date createdAt
     }
@@ -244,6 +251,15 @@ erDiagram
 
 `Review.result` is an embedded subdocument, not a separate collection: a result is never queried
 independently of its review, so embedding keeps a read to a single document.
+
+**Every finding carries a category.** Each entry in `bugs`, `security`, `performance` and
+`refactor` is tagged with one id from a fixed 27-value taxonomy defined in
+`server/services/findingCategories.js`, which the prompt, the validator, the Mongoose schema and
+the insights aggregation all import, so the four cannot drift apart. The category is validated as
+strictly as every other field, meaning a missing or unrecognised one goes through the same
+retry-once-then-502 path rather than being silently coerced. A closed list is what makes the
+Patterns page possible at all: free-text labels would never aggregate, because the same underlying
+problem comes back worded differently on every review.
 
 **Sharing is explicit opt-in.** `visibility` defaults to `private`, and only the owner can change
 it — the PATCH that sets it is scoped by `{ _id, userId }` like every other review write. The
@@ -351,6 +367,8 @@ flowchart TD
 | **JWT + bcrypt** | Credential theft, session forgery | 30-day signed tokens, bcrypt at 10 rounds, `select: false` on the hash |
 | **Input validation** | Malformed payloads reaching domain logic; oversized submissions | `express-validator` rules run before controllers, mirroring the controllers' own messages |
 | **Ownership scoping** | Horizontal privilege escalation | Every review query filters on `userId`; a foreign id returns `404`, never `403` |
+| **Encrypted tokens at rest** | Database disclosure turning into repository access | GitHub tokens stored AES-256-GCM with a key from `TOKEN_ENCRYPTION_KEY`; authenticated ciphertext, fresh IV per write, `select: false` on the field |
+| **Signed OAuth state** | An attacker attaching their token to someone else's account | The `state` carries the user id plus an HMAC over it, compared with `timingSafeEqual` in the callback |
 | **Opt-in sharing** | Accidental exposure of private code; owner de-anonymisation | `visibility` defaults to `private`; the unauthenticated read matches `visibility: 'public'`, redacts `userId` and `__v`, and is rate limited at 60 per 15 min |
 | **Prompt delimiters** | Prompt injection via submitted code | Random 16-hex boundary token per request; code labelled untrusted data the model must not obey |
 | **Output validation** | A malfunctioning model silently producing an empty or nonsensical review | Shape check before normalisation, one retry, then `502` |
@@ -428,6 +446,16 @@ that blocked submissions would reject legitimate security research code.
 - **Out-of-range scores retry instead of being clamped.** Clamping `readability: 42` to `10` turns
   a model malfunction into a *perfect score* shown to the user — the failure mode is worse than
   the error. Rejecting and retrying keeps a broken response from masquerading as a flattering one.
+
+- **The GitHub reviewer reuses `aiService.reviewCode`, it does not call Gemini itself.** A second
+  code path to the model would be a second path without the boundary delimiters, the output
+  validation or the retry. Each changed file's diff goes through the same function a pasted snippet
+  does, so the hardening cannot be bypassed by arriving from GitHub.
+
+- **A pull request is capped at ten reviewed files.** Each file is a Gemini call, so an unbounded
+  pull request is an unbounded bill and a request that never returns. Files past the cap, deleted
+  files, unsupported languages and oversized diffs come back labelled with why they were skipped
+  rather than silently missing.
 
 - **`app.js` split from `server.js`.** Startup side effects — env validation, the database
   connection, binding a port — live in `server.js`, so `createApp()` returns a mountable app.
