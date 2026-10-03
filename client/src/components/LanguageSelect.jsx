@@ -18,7 +18,7 @@ export default function LanguageSelect({ value, onChange }) {
       value={value}
       onChange={(e) => onChange(e.target.value)}
       aria-label="Programming language"
-      className="cursor-pointer rounded-lg border border-slate-700 bg-slate-900 px-4 py-2 text-sm font-medium text-slate-100 transition-colors hover:border-slate-600 focus:border-brand-500"
+      className="cursor-pointer rounded-lg border border-edge bg-surface px-4 py-2 text-sm font-medium text-fg transition-colors hover:border-muted/40 focus:border-accent"
     >
       {LANGUAGES.map((lang) => (
         <option key={lang.value} value={lang.value}>

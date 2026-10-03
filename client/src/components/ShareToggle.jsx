@@ -48,13 +48,13 @@ export default function ShareToggle({ reviewId, visibility, onChange }) {
   };
 
   return (
-    <div className="mb-8 rounded-xl border border-slate-800 bg-slate-950 p-4">
+    <div className="mb-8 rounded-xl border border-edge bg-canvas p-4">
       <div className="flex flex-wrap items-center justify-between gap-4">
         <div>
-          <p className="text-sm font-semibold text-slate-100">
+          <p className="text-sm font-semibold text-fg">
             {isPublic ? 'Anyone with the link can view this' : 'Only you can see this review'}
           </p>
-          <p className="mt-1 text-xs text-slate-400">
+          <p className="mt-1 text-xs text-muted">
             {isPublic
               ? 'Your name, email and account are not included in the shared page.'
               : 'Reviews are private until you share them.'}
@@ -75,7 +75,7 @@ export default function ShareToggle({ reviewId, visibility, onChange }) {
 
       {isPublic && (
         <div className="mt-4 flex flex-wrap items-center gap-3">
-          <code className="flex-1 overflow-x-auto whitespace-nowrap rounded-lg border border-slate-800 bg-slate-900 px-3 py-2 font-mono text-xs text-brand-400">
+          <code className="flex-1 overflow-x-auto whitespace-nowrap rounded-lg border border-edge bg-surface px-3 py-2 font-mono text-xs text-accent">
             {shareUrl}
           </code>
           <button
@@ -83,8 +83,8 @@ export default function ShareToggle({ reviewId, visibility, onChange }) {
             onClick={copy}
             className={`rounded-lg px-4 py-2 text-xs font-semibold transition-colors ${
               copied
-                ? 'bg-emerald-500/15 text-emerald-300'
-                : 'bg-slate-800 text-slate-200 hover:bg-slate-700'
+                ? 'bg-ok/15 text-ok'
+                : 'bg-raised text-fg hover:bg-raised-hover'
             }`}
           >
             <span aria-live="polite">{copied ? 'Copied!' : 'Copy link'}</span>

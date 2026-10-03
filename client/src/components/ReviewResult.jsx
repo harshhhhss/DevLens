@@ -11,7 +11,7 @@ export default function ReviewResult({ result, language }) {
   return (
     <div className="space-y-8">
       {summary && (
-        <div className="rounded-2xl border border-brand-500/30 bg-brand-500/10 p-6 text-sm leading-relaxed text-slate-200">
+        <div className="rounded-2xl border border-accent/30 bg-accent/10 p-6 text-sm leading-relaxed text-fg">
           {summary}
         </div>
       )}

@@ -2,24 +2,24 @@ import React from 'react';
 
 const VARIANTS = {
   error: {
-    box: 'border-red-500/30 bg-red-500/10 text-red-200',
+    box: 'border-danger/30 bg-danger/10 text-danger',
     icon: '!',
-    iconBox: 'bg-red-500/20 text-red-300',
+    iconBox: 'bg-danger/20 text-danger',
   },
   success: {
-    box: 'border-emerald-500/30 bg-emerald-500/10 text-emerald-200',
+    box: 'border-ok/30 bg-ok/10 text-ok',
     icon: '✓',
-    iconBox: 'bg-emerald-500/20 text-emerald-300',
+    iconBox: 'bg-ok/20 text-ok',
   },
   warning: {
-    box: 'border-yellow-500/30 bg-yellow-500/10 text-yellow-200',
+    box: 'border-severity-medium/30 bg-severity-medium/10 text-severity-medium',
     icon: '!',
-    iconBox: 'bg-yellow-500/20 text-yellow-300',
+    iconBox: 'bg-severity-medium/20 text-severity-medium',
   },
   info: {
-    box: 'border-brand-500/30 bg-brand-500/10 text-slate-200',
+    box: 'border-accent/30 bg-accent/10 text-fg',
     icon: 'i',
-    iconBox: 'bg-brand-500/20 text-brand-300',
+    iconBox: 'bg-accent/20 text-accent',
   },
 };
 

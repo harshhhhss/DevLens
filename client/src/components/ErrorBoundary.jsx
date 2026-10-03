@@ -36,18 +36,18 @@ export default class ErrorBoundary extends React.Component {
         <div className="surface w-full max-w-lg p-8 text-center sm:p-10">
           <div
             aria-hidden="true"
-            className="mx-auto mb-6 inline-flex h-12 w-12 items-center justify-center rounded-full bg-red-500/15 text-xl font-bold text-red-300"
+            className="mx-auto mb-6 inline-flex h-12 w-12 items-center justify-center rounded-full bg-danger/15 text-xl font-bold text-danger"
           >
             !
           </div>
           <h1 className="text-2xl font-bold tracking-tight text-white">Something went wrong</h1>
-          <p className="mx-auto mt-3 max-w-sm text-sm leading-relaxed text-slate-400">
+          <p className="mx-auto mt-3 max-w-sm text-sm leading-relaxed text-muted">
             DevLens hit an unexpected error and could not finish rendering this page. Your saved
             reviews are unaffected.
           </p>
 
           {import.meta.env.DEV && error?.message && (
-            <pre className="mt-6 overflow-x-auto rounded-xl border border-slate-800 bg-slate-950 p-4 text-left font-mono text-xs leading-relaxed text-red-300">
+            <pre className="mt-6 overflow-x-auto rounded-xl border border-edge bg-canvas p-4 text-left font-mono text-xs leading-relaxed text-danger">
               {error.message}
             </pre>
           )}

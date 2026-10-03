@@ -51,17 +51,17 @@ export default function Login() {
   };
 
   const inputClass = (name) =>
-    `field ${fieldErrors[name] ? 'border-red-500/60 hover:border-red-500 focus:border-red-500' : ''}`;
+    `field ${fieldErrors[name] ? 'border-danger/60 hover:border-danger focus:border-danger' : ''}`;
 
   return (
     <div className="mx-auto flex min-h-[70vh] max-w-md flex-col justify-center px-6 py-16">
       <div className="surface p-8 sm:p-10">
         <h1 className="text-2xl font-bold tracking-tight text-white">Welcome back</h1>
-        <p className="mt-2 text-sm text-slate-400">Log in to continue reviewing your code.</p>
+        <p className="mt-2 text-sm text-muted">Log in to continue reviewing your code.</p>
 
         <form onSubmit={handleSubmit} className="mt-8 space-y-6" noValidate aria-busy={loading}>
           <div>
-            <label htmlFor="email" className="mb-2 block text-sm font-medium text-slate-200">
+            <label htmlFor="email" className="mb-2 block text-sm font-medium text-fg">
               Email
             </label>
             <input
@@ -77,14 +77,14 @@ export default function Login() {
               aria-describedby={fieldErrors.email ? 'email-error' : undefined}
             />
             {fieldErrors.email && (
-              <p id="email-error" className="mt-2 text-xs text-red-300">
+              <p id="email-error" className="mt-2 text-xs text-danger">
                 {fieldErrors.email}
               </p>
             )}
           </div>
 
           <div>
-            <label htmlFor="password" className="mb-2 block text-sm font-medium text-slate-200">
+            <label htmlFor="password" className="mb-2 block text-sm font-medium text-fg">
               Password
             </label>
             <input
@@ -100,7 +100,7 @@ export default function Login() {
               aria-describedby={fieldErrors.password ? 'password-error' : undefined}
             />
             {fieldErrors.password && (
-              <p id="password-error" className="mt-2 text-xs text-red-300">
+              <p id="password-error" className="mt-2 text-xs text-danger">
                 {fieldErrors.password}
               </p>
             )}
@@ -114,11 +114,11 @@ export default function Login() {
           </button>
         </form>
 
-        <p className="mt-8 text-center text-sm text-slate-400">
+        <p className="mt-8 text-center text-sm text-muted">
           Don&apos;t have an account?{' '}
           <Link
             to="/register"
-            className="font-semibold text-brand-400 transition-colors hover:text-brand-300"
+            className="font-semibold text-accent transition-colors hover:text-accent"
           >
             Sign up
           </Link>

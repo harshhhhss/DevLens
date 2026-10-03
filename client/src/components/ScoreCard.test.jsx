@@ -7,9 +7,10 @@ function scoreColour(value) {
   const { container } = render(<ScoreCard label="Overall" score={value} />);
   const el = container.querySelector('span.text-3xl');
   const cls = el.className;
-  if (cls.includes('text-red')) return 'red';
-  if (cls.includes('text-yellow')) return 'yellow';
-  if (cls.includes('text-green')) return 'green';
+  // Semantic tokens: the score scale reuses the shared severity/outcome colours.
+  if (cls.includes('text-severity-critical')) return 'red';
+  if (cls.includes('text-severity-medium')) return 'yellow';
+  if (cls.includes('text-ok')) return 'green';
   return 'unknown';
 }
 

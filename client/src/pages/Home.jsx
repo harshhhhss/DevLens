@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import CodeInput from '../components/CodeInput.jsx';
 import LanguageSelect from '../components/LanguageSelect.jsx';
 import ReviewResult from '../components/ReviewResult.jsx';
@@ -40,6 +40,30 @@ export default function Home() {
     setSuccess('');
     setError(message);
   };
+
+  const formRef = useRef(null);
+
+  // Discoverable through the ? overlay rather than being hidden knowledge.
+  useEffect(() => {
+    const onKey = (e) => {
+      const el = e.target;
+      const inField =
+        el instanceof HTMLElement &&
+        (el.tagName === 'INPUT' || el.tagName === 'TEXTAREA' || el.isContentEditable);
+
+      if ((e.metaKey || e.ctrlKey) && e.key === 'Enter') {
+        e.preventDefault();
+        formRef.current?.requestSubmit();
+        return;
+      }
+      if (e.key === 'e' && !inField && !e.metaKey && !e.ctrlKey && !e.altKey) {
+        e.preventDefault();
+        document.getElementById('code-input')?.focus();
+      }
+    };
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
+  }, []);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -83,8 +107,8 @@ export default function Home() {
   return (
     <div className="mx-auto max-w-6xl px-6 py-16">
       <div className="mb-12 text-center">
-        <h1 className="text-4xl font-bold tracking-tight text-white">AI Code Review</h1>
-        <p className="mx-auto mt-4 max-w-2xl text-base leading-relaxed text-slate-400">
+        <h1 className="text-3xl font-bold tracking-tight text-white">AI Code Review</h1>
+        <p className="mx-auto mt-4 max-w-2xl text-base leading-relaxed text-muted">
           Paste your code or upload a file, and get an instant structured review powered by Gemini.
         </p>
       </div>
@@ -92,13 +116,13 @@ export default function Home() {
       {!isAuthenticated && (
         <Alert variant="warning" className="mb-8">
           You need an account to run reviews.{' '}
-          <Link to="/login" className="font-semibold text-yellow-100 underline underline-offset-2">
+          <Link to="/login" className="font-semibold text-severity-medium underline underline-offset-2">
             Log in
           </Link>{' '}
           or{' '}
           <Link
             to="/register"
-            className="font-semibold text-yellow-100 underline underline-offset-2"
+            className="font-semibold text-severity-medium underline underline-offset-2"
           >
             sign up
           </Link>
@@ -106,14 +130,14 @@ export default function Home() {
         </Alert>
       )}
 
-      <form onSubmit={handleSubmit} className="space-y-6" aria-busy={loading}>
+      <form ref={formRef} onSubmit={handleSubmit} className="space-y-6" aria-busy={loading}>
         <div className="flex flex-wrap items-center justify-between gap-4">
-          <label htmlFor="code-input" className="text-sm font-semibold text-slate-200">
+          <label htmlFor="code-input" className="text-sm font-semibold text-fg">
             Your Code
           </label>
           <div className="flex items-center gap-4">
             <span
-              className={`text-xs tabular-nums ${overLimit ? 'text-red-300' : 'text-slate-400'}`}
+              className={`text-xs tabular-nums ${overLimit ? 'text-danger' : 'text-muted'}`}
             >
               {charCount.toLocaleString()} / {MAX_CODE_LENGTH.toLocaleString()}
             </span>
@@ -152,9 +176,9 @@ export default function Home() {
         <div
           role="status"
           aria-live="polite"
-          className="mt-16 flex flex-col items-center justify-center gap-4 text-slate-400"
+          className="mt-16 flex flex-col items-center justify-center gap-4 text-muted"
         >
-          <Spinner size="lg" className="text-brand-500" />
+          <Spinner size="lg" className="text-accent" />
           <p className="text-sm">DevLens is analyzing your code. This usually takes a few seconds.</p>
         </div>
       )}

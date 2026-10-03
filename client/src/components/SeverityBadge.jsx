@@ -1,10 +1,10 @@
 import React from 'react';
 
 const SEVERITY_STYLES = {
-  Low: 'bg-sky-500/10 text-sky-300 border-sky-500/30',
-  Medium: 'bg-yellow-500/10 text-yellow-300 border-yellow-500/30',
-  High: 'bg-orange-500/10 text-orange-300 border-orange-500/30',
-  Critical: 'bg-red-500/10 text-red-300 border-red-500/30',
+  Low: 'bg-severity-low/10 text-severity-low border-severity-low/30',
+  Medium: 'bg-severity-medium/10 text-severity-medium border-severity-medium/30',
+  High: 'bg-severity-high/10 text-severity-high border-severity-high/30',
+  Critical: 'bg-severity-critical/10 text-severity-critical border-severity-critical/30',
 };
 
 export default function SeverityBadge({ severity }) {

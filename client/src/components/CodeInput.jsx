@@ -76,10 +76,10 @@ export default function CodeInput({
   };
 
   const borderClass = dragging
-    ? 'border-brand-500 bg-brand-500/5'
+    ? 'border-accent bg-accent/5'
     : invalid
-      ? 'border-red-500/60 hover:border-red-500 focus-within:border-red-500'
-      : 'border-slate-800 hover:border-slate-700 focus-within:border-brand-500';
+      ? 'border-danger/60 hover:border-danger focus-within:border-danger'
+      : 'border-edge hover:border-edge focus-within:border-accent';
 
   return (
     <div>
@@ -87,7 +87,7 @@ export default function CodeInput({
         onDrop={handleDrop}
         onDragOver={handleDragOver}
         onDragLeave={handleDragLeave}
-        className={`relative rounded-2xl border bg-slate-900 shadow-card transition-colors ${borderClass}`}
+        className={`relative rounded-2xl border bg-surface shadow-card transition-colors ${borderClass}`}
       >
         <textarea
           id={id}
@@ -98,12 +98,12 @@ export default function CodeInput({
           spellCheck={false}
           aria-label="Code to review"
           aria-invalid={invalid || undefined}
-          className="h-96 w-full resize-y rounded-2xl bg-transparent p-6 font-mono text-sm leading-relaxed text-slate-100 outline-none placeholder:text-slate-500"
+          className="h-96 w-full resize-y rounded-2xl bg-transparent p-6 font-mono text-sm leading-relaxed text-fg outline-none placeholder:text-muted"
         />
 
         {dragging && (
-          <div className="pointer-events-none absolute inset-0 flex items-center justify-center rounded-2xl bg-slate-950/80">
-            <p className="text-sm font-semibold text-brand-300">Drop your file to load it</p>
+          <div className="pointer-events-none absolute inset-0 flex items-center justify-center rounded-2xl bg-canvas/80">
+            <p className="text-sm font-semibold text-accent">Drop your file to load it</p>
           </div>
         )}
       </div>
@@ -133,22 +133,22 @@ export default function CodeInput({
         </label>
 
         {loadedFile ? (
-          <span className="flex items-center gap-2 text-xs text-slate-400">
-            <span className="rounded-md bg-slate-800 px-2.5 py-1 font-mono text-slate-300">
+          <span className="flex items-center gap-2 text-xs text-muted">
+            <span className="rounded-md bg-raised px-2.5 py-1 font-mono text-fg">
               {loadedFile.name}
             </span>
             {formatBytes(loadedFile.size)}
             <button
               type="button"
               onClick={clearFile}
-              className="rounded-lg px-2 py-1 text-slate-400 transition-colors hover:text-red-300"
+              className="rounded-lg px-2 py-1 text-muted transition-colors hover:text-danger"
               aria-label={`Clear ${loadedFile.name}`}
             >
               Clear
             </button>
           </span>
         ) : (
-          <span className="text-xs text-slate-500">or drag a source file onto the editor</span>
+          <span className="text-xs text-muted">or drag a source file onto the editor</span>
         )}
       </div>
     </div>

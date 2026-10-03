@@ -34,10 +34,10 @@ export default function CleanCodeViewer({ code, language }) {
           aria-label="Copy rewritten code to clipboard"
           className={`rounded-lg px-4 py-2 text-xs font-semibold transition-colors ${
             copied
-              ? 'bg-emerald-500/15 text-emerald-300'
+              ? 'bg-ok/15 text-ok'
               : copyFailed
-                ? 'bg-red-500/15 text-red-300'
-                : 'bg-slate-800 text-slate-200 hover:bg-slate-700'
+                ? 'bg-danger/15 text-danger'
+                : 'bg-raised text-fg hover:bg-raised-hover'
           }`}
         >
           <span aria-live="polite">
@@ -46,7 +46,7 @@ export default function CleanCodeViewer({ code, language }) {
         </button>
       </div>
       {code ? (
-        <div className="overflow-hidden rounded-xl border border-slate-800">
+        <div className="overflow-hidden rounded-xl border border-edge">
           <SyntaxHighlighter
             language={language}
             style={vscDarkPlus}
@@ -66,7 +66,7 @@ export default function CleanCodeViewer({ code, language }) {
           </SyntaxHighlighter>
         </div>
       ) : (
-        <p className="text-sm text-slate-400">No rewritten code available.</p>
+        <p className="text-sm text-muted">No rewritten code available.</p>
       )}
     </div>
   );

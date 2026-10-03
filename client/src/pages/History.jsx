@@ -5,6 +5,7 @@ import { LANGUAGES } from '../components/LanguageSelect.jsx';
 import ReviewResult from '../components/ReviewResult.jsx';
 import Alert from '../components/Alert.jsx';
 import Spinner from '../components/Spinner.jsx';
+import SkeletonList from '../components/Skeleton.jsx';
 import ShareToggle from '../components/ShareToggle.jsx';
 import { getErrorMessage } from '../utils/errorMessage.js';
 
@@ -96,24 +97,17 @@ export default function History() {
       )}
 
       {loading ? (
-        <div
-          role="status"
-          aria-live="polite"
-          className="flex items-center justify-center gap-3 py-16 text-sm text-slate-400"
-        >
-          <Spinner size="md" className="text-brand-500" />
-          Loading your reviews...
-        </div>
+        <SkeletonList count={4} lines={1} label="Loading your reviews" />
       ) : reviews.length === 0 ? (
         <div className="surface p-12 text-center">
           <div
             aria-hidden="true"
-            className="mx-auto mb-6 inline-flex h-12 w-12 items-center justify-center rounded-full bg-brand-500/15 text-xl text-brand-300"
+            className="mx-auto mb-6 inline-flex h-12 w-12 items-center justify-center rounded-full bg-accent/15 text-xl text-accent"
           >
             ⌕
           </div>
           <p className="text-base font-semibold text-white">No reviews yet</p>
-          <p className="mx-auto mt-2 max-w-sm text-sm leading-relaxed text-slate-400">
+          <p className="mx-auto mt-2 max-w-sm text-sm leading-relaxed text-muted">
             Once you run your first code review, it will show up here so you can revisit the
             findings any time.
           </p>
@@ -128,7 +122,7 @@ export default function History() {
             return (
               <div
                 key={review._id}
-                className="surface overflow-hidden transition-colors hover:border-slate-700"
+                className="surface overflow-hidden transition-colors hover:border-edge"
               >
                 <div className="flex w-full flex-wrap items-center justify-between gap-4 px-6 py-4">
                   <button
@@ -139,22 +133,22 @@ export default function History() {
                     )} review from ${new Date(review.createdAt).toLocaleString()}`}
                     className="flex flex-1 items-center gap-4 rounded-lg text-left"
                   >
-                    <span className="rounded-md bg-slate-800 px-2.5 py-0.5 text-xs font-semibold text-slate-300">
+                    <span className="chip">
                       {languageLabel(review.language)}
                     </span>
-                    <span className="text-sm text-slate-400">
+                    <span className="text-sm text-muted">
                       {new Date(review.createdAt).toLocaleString()}
                     </span>
                   </button>
                   <div className="flex items-center gap-4">
-                    <span className="text-sm font-semibold tabular-nums text-brand-400">
+                    <span className="text-sm font-semibold tabular-nums text-accent">
                       Overall: {review.result?.scores?.overall?.toFixed?.(1) ?? '-'}
                     </span>
                     <button
                       onClick={() => handleDelete(review._id)}
                       disabled={deletingId === review._id}
                       aria-label="Delete this review"
-                      className="inline-flex items-center gap-2 rounded-lg bg-slate-800 px-4 py-2 text-xs font-semibold text-red-300 transition-colors hover:bg-red-500/20 hover:text-red-200 disabled:cursor-not-allowed disabled:opacity-50"
+                      className="inline-flex items-center gap-2 rounded-lg bg-raised px-4 py-2 text-xs font-semibold text-danger transition-colors hover:bg-danger/20 hover:text-danger disabled:cursor-not-allowed disabled:opacity-50"
                     >
                       {deletingId === review._id && <Spinner size="sm" />}
                       {deletingId === review._id ? 'Deleting...' : 'Delete'}
@@ -163,14 +157,14 @@ export default function History() {
                 </div>
 
                 {isOpen && (
-                  <div className="border-t border-slate-800 p-6">
+                  <div className="border-t border-edge p-6">
                     {detailLoading ? (
                       <div
                         role="status"
                         aria-live="polite"
-                        className="flex items-center gap-3 py-4 text-sm text-slate-400"
+                        className="flex items-center gap-3 py-4 text-sm text-muted"
                       >
-                        <Spinner size="sm" className="text-brand-500" />
+                        <Spinner size="sm" className="text-accent" />
                         Loading review details...
                       </div>
                     ) : selectedReview ? (
@@ -182,8 +176,8 @@ export default function History() {
                             setSelectedReview((prev) => ({ ...prev, visibility }))
                           }
                         />
-                        <div className="mb-8 overflow-x-auto rounded-xl border border-slate-800 bg-slate-950 p-6">
-                          <pre className="whitespace-pre-wrap font-mono text-xs leading-relaxed text-slate-300">
+                        <div className="mb-8 overflow-x-auto rounded-xl border border-edge bg-canvas p-6">
+                          <pre className="whitespace-pre-wrap font-mono text-xs leading-relaxed text-fg">
                             {selectedReview.code}
                           </pre>
                         </div>
@@ -211,7 +205,7 @@ export default function History() {
           >
             Previous
           </button>
-          <span className="text-sm tabular-nums text-slate-400" aria-live="polite">
+          <span className="text-sm tabular-nums text-muted" aria-live="polite">
             Page {page} of {totalPages}
           </span>
           <button

@@ -12,9 +12,9 @@ export default function ProtectedRoute({ children }) {
       <div
         role="status"
         aria-live="polite"
-        className="flex h-64 items-center justify-center gap-3 text-sm text-slate-400"
+        className="flex h-64 items-center justify-center gap-3 text-sm text-muted"
       >
-        <Spinner size="md" className="text-brand-500" />
+        <Spinner size="md" className="text-accent" />
         Checking your session...
       </div>
     );

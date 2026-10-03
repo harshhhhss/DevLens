@@ -49,6 +49,16 @@ export const fetchReviewHistory = (page = 1, limit = 10) =>
   api.get(`/review/history?page=${page}&limit=${limit}`);
 export const fetchReviewById = (id) => api.get(`/review/${id}`);
 export const deleteReviewById = (id) => api.delete(`/review/${id}`);
+export const fetchInsights = () => api.get('/review/insights');
+
+export const fetchGithubStatus = () => api.get('/github/status');
+export const startGithubConnect = () => api.get('/github/connect');
+export const disconnectGithub = () => api.delete('/github/disconnect');
+export const fetchGithubRepos = () => api.get('/github/repos');
+export const fetchGithubPulls = (owner, repo) => api.get(`/github/repos/${owner}/${repo}/pulls`);
+export const reviewPullRequest = (data) => api.post('/github/review', data);
+export const commentOnPullRequest = (reviewId) =>
+  api.post(`/github/review/${reviewId}/comment`);
 export const updateReviewVisibility = (id, visibility) =>
   api.patch(`/review/${id}/visibility`, { visibility });
 

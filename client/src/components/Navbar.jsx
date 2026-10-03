@@ -12,26 +12,26 @@ export default function Navbar() {
   };
 
   const linkClass = ({ isActive }) =>
-    `rounded-lg px-4 py-2 text-sm font-medium transition-colors ${
+    `rounded-lg px-2.5 py-2 text-sm font-medium transition-colors sm:px-4 ${
       isActive
-        ? 'bg-brand-500/15 text-brand-300'
-        : 'text-slate-400 hover:bg-slate-800 hover:text-slate-100'
+        ? 'bg-accent/15 text-accent'
+        : 'text-muted hover:bg-raised-hover hover:text-fg'
     }`;
 
   return (
-    <nav className="sticky top-0 z-20 border-b border-slate-800 bg-slate-950/80 backdrop-blur">
-      <div className="mx-auto flex max-w-6xl items-center justify-between gap-6 px-6 py-4">
+    <nav className="sticky top-0 z-20 border-b border-edge bg-canvas/80 backdrop-blur">
+      <div className="mx-auto flex max-w-6xl flex-wrap items-center justify-between gap-x-6 gap-y-3 px-4 py-4 sm:px-6">
         <Link
           to="/"
-          className="flex items-center gap-3 text-base font-bold tracking-tight text-white transition-colors hover:text-brand-300"
+          className="flex items-center gap-3 text-base font-bold tracking-tight text-white transition-colors hover:text-accent"
         >
-          <span className="inline-flex h-9 w-9 items-center justify-center rounded-lg bg-brand-600 text-sm font-bold text-white shadow-glow">
+          <span className="inline-flex h-9 w-9 items-center justify-center rounded-lg bg-accent text-sm font-bold text-canvas">
             DL
           </span>
           DevLens
         </Link>
 
-        <div className="flex items-center gap-2">
+        <div className="flex flex-wrap items-center gap-x-1 gap-y-2 sm:gap-x-2">
           <NavLink to="/" className={linkClass} end>
             Review
           </NavLink>
@@ -40,22 +40,32 @@ export default function Navbar() {
               History
             </NavLink>
           )}
+          {isAuthenticated && (
+            <NavLink to="/insights" className={linkClass}>
+              Patterns
+            </NavLink>
+          )}
+          {isAuthenticated && (
+            <NavLink to="/github" className={linkClass}>
+              GitHub
+            </NavLink>
+          )}
 
           {isAuthenticated ? (
-            <div className="ml-4 flex items-center gap-4">
-              <span className="hidden text-sm text-slate-400 sm:inline">{user?.name}</span>
+            <div className="flex items-center gap-3 sm:ml-4 sm:gap-4">
+              <span className="hidden text-sm text-muted sm:inline">{user?.name}</span>
               <button onClick={handleLogout} className="btn-ghost">
                 Logout
               </button>
             </div>
           ) : (
-            <div className="ml-4 flex items-center gap-2">
+            <div className="flex items-center gap-2 sm:ml-4">
               <NavLink to="/login" className={linkClass}>
                 Login
               </NavLink>
               <NavLink
                 to="/register"
-                className="rounded-lg bg-brand-600 px-4 py-2 text-sm font-semibold text-white transition-colors hover:bg-brand-500"
+                className="rounded-lg bg-fg px-4 py-2 text-sm font-semibold text-canvas transition-colors hover:bg-fg-hover"
               >
                 Sign up
               </NavLink>

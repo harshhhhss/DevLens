@@ -39,36 +39,37 @@ export default {
         '4xl': ['2.25rem', { lineHeight: '2.5rem', letterSpacing: '-0.02em' }],
       },
       colors: {
-        // Electric violet. Verified against the slate-950/900 surfaces:
-        // 600 carries white text at 5.70:1 and 400 reads at 7.41:1 on the page
-        // background, so solid buttons use 600 and accent text uses 400.
-        brand: {
-          50: '#f5f3ff',
-          100: '#ede9fe',
-          200: '#ddd6fe',
-          300: '#c4b5fd',
-          400: '#a78bfa',
-          500: '#8b5cf6',
-          600: '#7c3aed',
-          700: '#6d28d9',
-          800: '#5b21b6',
-          900: '#4c1d95',
-          950: '#2e1065',
+        // Semantic surface and text tokens. Everything structural resolves to
+        // one of these six, so a theme change is a change here rather than a
+        // sweep through every component.
+        canvas: '#0A0A0A', // page background
+        surface: '#141414', // cards and panels
+        edge: 'rgba(255,255,255,0.08)', // borders and dividers
+        raised: '#1F1F1F', // inset chips, tracks, subtle fills
+        'raised-hover': '#2A2A2A', // the same fills on hover
+        fg: '#F2F2F2', // primary text
+        'fg-hover': '#D9D9D9', // primary button hover
+        muted: '#94949C', // secondary text
+        subtle: '#6B6B70', // tertiary text and meta
+
+        // The one brand colour, spent deliberately: the logo mark, section
+        // labels and step numerals. Primary buttons are white on black, not
+        // accent-coloured, which is what keeps the accent meaningful.
+        accent: '#E0A030',
+
+        // Severity is a fixed four-step scale, ordered by lightness as well as
+        // hue so it survives colour-blindness and greyscale.
+        severity: {
+          critical: '#f87171',
+          high: '#fb923c',
+          medium: '#facc15',
+          low: '#38bdf8',
         },
-        // Marketing/landing palette. The app UI stays on slate + brand; the
-        // landing page uses these slightly warmer, flatter neutrals so it reads
-        // as a product page rather than another screen of the app.
-        // accent-light is deliberately absent: it is exactly brand-400.
-        ink: {
-          950: '#0D0D14', // page background
-          900: '#15151F', // cards and surfaces
-          400: '#A6A6B8', // muted text
-          100: '#F4F4F6', // primary text
-        },
-        accent: {
-          DEFAULT: '#5B3DE0',
-          hover: '#4A2FC4',
-        },
+
+        // Outcome colours. One green and one red, so "good" and "bad" never
+        // arrive as two different greens depending on the component.
+        ok: '#34d399',
+        danger: '#f87171',
       },
       boxShadow: {
         card: '0 1px 2px 0 rgb(0 0 0 / 0.3), 0 8px 24px -12px rgb(0 0 0 / 0.5)',

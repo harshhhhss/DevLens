@@ -55,7 +55,7 @@ export default function Register() {
   };
 
   const inputClass = (name) =>
-    `field ${fieldErrors[name] ? 'border-red-500/60 hover:border-red-500 focus:border-red-500' : ''}`;
+    `field ${fieldErrors[name] ? 'border-danger/60 hover:border-danger focus:border-danger' : ''}`;
 
   const passwordStrength = Math.min(form.password.length / 12, 1) * 100;
 
@@ -63,11 +63,11 @@ export default function Register() {
     <div className="mx-auto flex min-h-[70vh] max-w-md flex-col justify-center px-6 py-16">
       <div className="surface p-8 sm:p-10">
         <h1 className="text-2xl font-bold tracking-tight text-white">Create your account</h1>
-        <p className="mt-2 text-sm text-slate-400">Start getting AI-powered code reviews.</p>
+        <p className="mt-2 text-sm text-muted">Start getting AI-powered code reviews.</p>
 
         <form onSubmit={handleSubmit} className="mt-8 space-y-6" noValidate aria-busy={loading}>
           <div>
-            <label htmlFor="name" className="mb-2 block text-sm font-medium text-slate-200">
+            <label htmlFor="name" className="mb-2 block text-sm font-medium text-fg">
               Name
             </label>
             <input
@@ -83,14 +83,14 @@ export default function Register() {
               aria-describedby={fieldErrors.name ? 'name-error' : undefined}
             />
             {fieldErrors.name && (
-              <p id="name-error" className="mt-2 text-xs text-red-300">
+              <p id="name-error" className="mt-2 text-xs text-danger">
                 {fieldErrors.name}
               </p>
             )}
           </div>
 
           <div>
-            <label htmlFor="email" className="mb-2 block text-sm font-medium text-slate-200">
+            <label htmlFor="email" className="mb-2 block text-sm font-medium text-fg">
               Email
             </label>
             <input
@@ -106,14 +106,14 @@ export default function Register() {
               aria-describedby={fieldErrors.email ? 'email-error' : undefined}
             />
             {fieldErrors.email && (
-              <p id="email-error" className="mt-2 text-xs text-red-300">
+              <p id="email-error" className="mt-2 text-xs text-danger">
                 {fieldErrors.email}
               </p>
             )}
           </div>
 
           <div>
-            <label htmlFor="password" className="mb-2 block text-sm font-medium text-slate-200">
+            <label htmlFor="password" className="mb-2 block text-sm font-medium text-fg">
               Password
             </label>
             <input
@@ -131,20 +131,20 @@ export default function Register() {
               }
             />
             {form.password && !fieldErrors.password && (
-              <div className="mt-2 h-1 w-full overflow-hidden rounded-full bg-slate-800">
+              <div className="mt-2 h-1 w-full overflow-hidden rounded bg-raised">
                 <div
-                  className={`h-full rounded-full transition-all duration-300 ${
-                    form.password.length < MIN_PASSWORD_LENGTH ? 'bg-red-500' : 'bg-emerald-500'
+                  className={`h-full rounded transition-all duration-300 ${
+                    form.password.length < MIN_PASSWORD_LENGTH ? 'bg-danger' : 'bg-ok'
                   }`}
                   style={{ width: `${passwordStrength}%` }}
                 />
               </div>
             )}
-            <p id="password-hint" className="mt-2 text-xs text-slate-400">
+            <p id="password-hint" className="mt-2 text-xs text-muted">
               Use at least {MIN_PASSWORD_LENGTH} characters.
             </p>
             {fieldErrors.password && (
-              <p id="password-error" className="mt-1 text-xs text-red-300">
+              <p id="password-error" className="mt-1 text-xs text-danger">
                 {fieldErrors.password}
               </p>
             )}
@@ -159,11 +159,11 @@ export default function Register() {
           </button>
         </form>
 
-        <p className="mt-8 text-center text-sm text-slate-400">
+        <p className="mt-8 text-center text-sm text-muted">
           Already have an account?{' '}
           <Link
             to="/login"
-            className="font-semibold text-brand-400 transition-colors hover:text-brand-300"
+            className="font-semibold text-accent transition-colors hover:text-accent"
           >
             Log in
           </Link>
