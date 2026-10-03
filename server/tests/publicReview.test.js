@@ -11,10 +11,10 @@ const app = createApp();
  */
 const AI_REVIEW = {
   summary: 'Builds SQL by concatenation.',
-  bugs: [{ line: 2, issue: 'Returns the query string', fix: 'Return the row' }],
-  security: [{ line: 2, severity: 'Critical', issue: 'SQL injection', fix: 'Parameterise' }],
-  performance: [{ line: 4, issue: 'O(n^2) scan', fix: 'Use a Set' }],
-  refactor: [{ suggestion: 'Use const', reason: 'Block scoping' }],
+  bugs: [{ line: 2, issue: 'Returns the query string', fix: 'Return the row', category: 'logic-error' }],
+  security: [{ line: 2, severity: 'Critical', issue: 'SQL injection', fix: 'Parameterise', category: 'sql-injection' }],
+  performance: [{ line: 4, issue: 'O(n^2) scan', fix: 'Use a Set', category: 'algorithmic-complexity' }],
+  refactor: [{ suggestion: 'Use const', reason: 'Block scoping', category: 'style' }],
   scores: { readability: 4, security: 1, overall: 2 },
   cleanCode: 'const user = await db.query(sql, [id]);',
 };

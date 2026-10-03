@@ -4,6 +4,7 @@ const ReviewValidationFailure = require('../models/ReviewValidationFailure');
 const { reviewCode } = require('../services/aiService');
 const { scanForInjection, hashCode, snippetOf } = require('../services/promptSafety');
 const { AiValidationError } = require('../services/reviewValidation');
+const { categoryLabel, DEFAULT_CATEGORY } = require('../services/findingCategories');
 
 const SUPPORTED_LANGUAGES = [
   'javascript',
@@ -135,6 +136,67 @@ const getReviewHistory = async (req, res, next) => {
   }
 };
 
+/** How many of the most recent reviews form the "recent" trend window. */
+const TREND_WINDOW = 5;
+
+/** Reviews scanned at most, so a long history cannot make this unbounded. */
+const INSIGHTS_REVIEW_LIMIT = 100;
+
+// @route GET /api/v1/review/insights
+const getReviewInsights = async (req, res, next) => {
+  try {
+    // Scoped to the requesting user exactly like every other review query -
+    // these numbers are never aggregated across accounts.
+    const reviews = await Review.find({ userId: req.user._id })
+      .sort({ createdAt: -1 })
+      .limit(INSIGHTS_REVIEW_LIMIT)
+      .select('result.bugs.category result.security.category result.performance.category result.refactor.category createdAt')
+      .lean();
+
+    const counts = new Map();
+    let totalFindings = 0;
+
+    reviews.forEach((review, index) => {
+      // reviews are newest-first, so the first TREND_WINDOW are "recent".
+      const bucket =
+        index < TREND_WINDOW ? 'recent' : index < TREND_WINDOW * 2 ? 'previous' : null;
+
+      for (const field of ['bugs', 'security', 'performance', 'refactor']) {
+        for (const finding of review.result?.[field] || []) {
+          const category = finding?.category || DEFAULT_CATEGORY;
+          if (!counts.has(category)) counts.set(category, { count: 0, recent: 0, previous: 0 });
+          const entry = counts.get(category);
+          entry.count += 1;
+          if (bucket) entry[bucket] += 1;
+          totalFindings += 1;
+        }
+      }
+    });
+
+    const categories = [...counts.entries()]
+      .map(([category, { count, recent, previous }]) => ({
+        category,
+        label: categoryLabel(category),
+        count,
+        recent,
+        previous,
+        // "up" means it is showing up more often lately, which is the thing
+        // worth acting on.
+        trend: recent > previous ? 'up' : recent < previous ? 'down' : 'flat',
+      }))
+      .sort((a, b) => b.count - a.count || a.label.localeCompare(b.label));
+
+    return res.status(200).json({
+      totalReviews: reviews.length,
+      totalFindings,
+      trendWindow: TREND_WINDOW,
+      categories,
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
 // @route GET /api/v1/review/:id
 const getReviewById = async (req, res, next) => {
   try {
@@ -221,6 +283,7 @@ const deleteReview = async (req, res, next) => {
 module.exports = {
   createReview,
   getReviewHistory,
+  getReviewInsights,
   getReviewById,
   deleteReview,
   updateReviewVisibility,

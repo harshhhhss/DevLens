@@ -10,6 +10,8 @@
  * The checks mirror what buildPrompt() actually asks Gemini to return.
  */
 
+const { CATEGORY_IDS, isCategory } = require('./findingCategories');
+
 const RAW_SNIPPET_LENGTH = 500;
 
 const SEVERITIES = ['Low', 'Medium', 'High', 'Critical'];
@@ -63,6 +65,15 @@ function validateEntries(list, field, requiredKey, failures) {
     }
     if (!isNonEmptyString(entry[requiredKey])) {
       failures.push(`${field}[${index}].${requiredKey}: expected a non-empty string`);
+    }
+    // Checked as strictly as the other fields: an unrecognised category would
+    // aggregate into a pattern that does not exist.
+    if (!isCategory(entry.category)) {
+      failures.push(
+        `${field}[${index}].category: expected one of the ${CATEGORY_IDS.length} known categories, got ${JSON.stringify(
+          entry.category
+        )}`
+      );
     }
     if (
       field === 'security' &&

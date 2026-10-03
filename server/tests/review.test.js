@@ -14,12 +14,12 @@ const app = createApp();
  */
 const AI_REVIEW = {
   summary: 'Uses string concatenation to build SQL.',
-  bugs: [{ line: 3, issue: 'Returns the query, not the row', fix: 'Return the result' }],
+  bugs: [{ line: 3, issue: 'Returns the query, not the row', fix: 'Return the result', category: 'logic-error' }],
   security: [
-    { line: 2, severity: 'Critical', issue: 'SQL injection', fix: 'Use a parameterised query' },
+    { line: 2, severity: 'Critical', issue: 'SQL injection', fix: 'Use a parameterised query', category: 'sql-injection' },
   ],
-  performance: [{ line: 5, issue: 'O(n^2) scan', fix: 'Use a Set' }],
-  refactor: [{ suggestion: 'Use const', reason: 'Block scoping' }],
+  performance: [{ line: 5, issue: 'O(n^2) scan', fix: 'Use a Set', category: 'algorithmic-complexity' }],
+  refactor: [{ suggestion: 'Use const', reason: 'Block scoping', category: 'style' }],
   scores: { readability: 4, security: 1, overall: 2 },
   cleanCode: 'const user = await db.query(sql, [id]);',
 };

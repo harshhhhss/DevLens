@@ -1,5 +1,6 @@
 const { GoogleGenerativeAI } = require('@google/generative-ai');
 const { makeBoundary } = require('./promptSafety');
+const { CATEGORY_IDS, DEFAULT_CATEGORY, isCategory } = require('./findingCategories');
 const {
   validateReviewResult,
   AiValidationError,
@@ -21,16 +22,16 @@ const getClient = () => {
 const RESPONSE_SCHEMA_HINT = `{
   "summary": "string - a short 2-3 sentence overview of the code quality",
   "bugs": [
-    { "line": "number or string (line number or range, null if not applicable)", "issue": "string describing the bug", "fix": "string describing how to fix it" }
+    { "line": "number or string (line number or range, null if not applicable)", "issue": "string describing the bug", "fix": "string describing how to fix it", "category": "one of the category ids listed below" }
   ],
   "security": [
-    { "line": "number or string or null", "severity": "one of: Low, Medium, High, Critical", "issue": "string describing the vulnerability", "fix": "string describing the remediation" }
+    { "line": "number or string or null", "severity": "one of: Low, Medium, High, Critical", "issue": "string describing the vulnerability", "fix": "string describing the remediation", "category": "one of the category ids listed below" }
   ],
   "performance": [
-    { "line": "number or string or null", "issue": "string describing the performance issue", "fix": "string describing the optimization" }
+    { "line": "number or string or null", "issue": "string describing the performance issue", "fix": "string describing the optimization", "category": "one of the category ids listed below" }
   ],
   "refactor": [
-    { "suggestion": "string describing a refactor suggestion", "reason": "string explaining why it improves the code" }
+    { "suggestion": "string describing a refactor suggestion", "reason": "string explaining why it improves the code", "category": "one of the category ids listed below" }
   ],
   "scores": {
     "readability": "number from 0 to 10",
@@ -56,6 +57,8 @@ Rules:
 - "security" should list real vulnerabilities (e.g. injection, unsafe deserialization, hardcoded secrets, XSS, insecure randomness, missing validation). Use empty array if none found.
 - "performance" should list inefficiencies (e.g. unnecessary loops, N+1 queries, blocking calls, memory leaks).
 - "refactor" should list maintainability / readability / design improvements.
+- EVERY entry in "bugs", "security", "performance" and "refactor" MUST include a "category", chosen from this exact list: ${CATEGORY_IDS.join(', ')}.
+- Pick the single closest category for each finding. Use "other" only when genuinely nothing else fits. Never invent a category outside the list.
 - "scores" must be integers or numbers between 0 and 10, where higher is better.
 - "cleanCode" must contain the complete rewritten code (the whole file/snippet, not just a diff).
 - CRITICAL: "cleanCode" MUST be written in the SAME programming language as the submitted code. Never port, translate, or convert the code into a different language. The "${language}" label above is only a hint supplied by the user and may be wrong. If the submitted code is clearly not ${language}, ignore the label, keep the code in its actual language, and say so in "summary".
@@ -105,6 +108,7 @@ function normalizeResult(parsed) {
       line: b?.line ?? null,
       issue: b?.issue ? String(b.issue) : '',
       fix: b?.fix ? String(b.fix) : '',
+      category: isCategory(b?.category) ? b.category : DEFAULT_CATEGORY,
     })),
     security: toArray(parsed.security).map((s) => {
       const allowedSeverities = ['Low', 'Medium', 'High', 'Critical'];
@@ -114,16 +118,19 @@ function normalizeResult(parsed) {
         severity,
         issue: s?.issue ? String(s.issue) : '',
         fix: s?.fix ? String(s.fix) : '',
+        category: isCategory(s?.category) ? s.category : DEFAULT_CATEGORY,
       };
     }),
     performance: toArray(parsed.performance).map((p) => ({
       line: p?.line ?? null,
       issue: p?.issue ? String(p.issue) : '',
       fix: p?.fix ? String(p.fix) : '',
+      category: isCategory(p?.category) ? p.category : DEFAULT_CATEGORY,
     })),
     refactor: toArray(parsed.refactor).map((r) => ({
       suggestion: r?.suggestion ? String(r.suggestion) : '',
       reason: r?.reason ? String(r.reason) : '',
+      category: isCategory(r?.category) ? r.category : DEFAULT_CATEGORY,
     })),
     scores: {
       readability: normalizeScore(parsed?.scores?.readability),

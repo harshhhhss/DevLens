@@ -1,10 +1,14 @@
 const mongoose = require('mongoose');
+const { CATEGORY_IDS, DEFAULT_CATEGORY } = require('../services/findingCategories');
 
 const bugSchema = new mongoose.Schema(
   {
     line: { type: mongoose.Schema.Types.Mixed, default: null },
     issue: { type: String, default: '' },
     fix: { type: String, default: '' },
+    // Fixed taxonomy, so recurring problems can be aggregated across a
+    // user's reviews by the insights endpoint.
+    category: { type: String, enum: CATEGORY_IDS, default: DEFAULT_CATEGORY, index: true },
   },
   { _id: false }
 );
@@ -19,6 +23,9 @@ const securityIssueSchema = new mongoose.Schema(
     },
     issue: { type: String, default: '' },
     fix: { type: String, default: '' },
+    // Fixed taxonomy, so recurring problems can be aggregated across a
+    // user's reviews by the insights endpoint.
+    category: { type: String, enum: CATEGORY_IDS, default: DEFAULT_CATEGORY, index: true },
   },
   { _id: false }
 );
@@ -28,6 +35,9 @@ const performanceIssueSchema = new mongoose.Schema(
     line: { type: mongoose.Schema.Types.Mixed, default: null },
     issue: { type: String, default: '' },
     fix: { type: String, default: '' },
+    // Fixed taxonomy, so recurring problems can be aggregated across a
+    // user's reviews by the insights endpoint.
+    category: { type: String, enum: CATEGORY_IDS, default: DEFAULT_CATEGORY, index: true },
   },
   { _id: false }
 );
@@ -36,6 +46,9 @@ const refactorSuggestionSchema = new mongoose.Schema(
   {
     suggestion: { type: String, default: '' },
     reason: { type: String, default: '' },
+    // Fixed taxonomy, so recurring problems can be aggregated across a
+    // user's reviews by the insights endpoint.
+    category: { type: String, enum: CATEGORY_IDS, default: DEFAULT_CATEGORY, index: true },
   },
   { _id: false }
 );
